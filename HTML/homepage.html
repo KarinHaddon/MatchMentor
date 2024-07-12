@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter Tight", arial, serif;
+            display: flex;
+            height: 100vh;
+            font-size: 100%;
+            position: relative;
+            z-index: 0;
+        }
+
+        .banner {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: rgb(255, 255, 255);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner h2 {
+            font-size: 22px;
+            color: black;
+            margin: 0;
+            padding-left: 5px;
+        }
+
+        .banner .match {
+            color: #000000;
+        }
+
+        .banner .mentor {
+            color: #33AFFF;
+        }
+
+        .button {
+            padding: 8px 15px;
+            font-size: 16px;
+            text-align: center;
+            justify-content: center;
+            cursor: pointer;
+            outline: none;
+            color: #fff;
+            background-color: #000000;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            box-shadow: 0 4px #6e6e6e;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .button:hover {
+            background-color: #3684ea;
+        }
+
+        .button:active {
+            background-color: #3684ea;
+            box-shadow: 0 2px #666;
+            transform: translateY(2px);
+        }
+
+        .button.change-text::after {
+            content: ' +';
+            display: none;
+        }
+
+        .button.change-text:hover::after {
+            display: inline;
+        }
+
+        .button.change-text:hover span {
+            display: none;
+        }
+
+        .title-heading{
+            text-align:left;
+            padding-left: 20px;
+            padding-top: 100px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="banner">
+        <h2><span class="match">Match</span><span class="mentor">Mentor</span></h2>
+        <div class="button-group">
+            <a href="http://127.0.0.1:5500/HTML/labelling.html" class="button change-text"><span>Add</span></a>
+            <a href="http://127.0.0.1:5500/HTML/stats.html" class="button">Statistics</a>
+            <a href="http://127.0.0.1:5500/HTML/login.html" class="button">Log out</a>
+        </div>
+    </div>
+    <div class="title-heading">
+        <h1>Your Games</h1>
+    </div>
+    <div class = "container">
+        
+    </div>
+
+</body>
+
+</html>
