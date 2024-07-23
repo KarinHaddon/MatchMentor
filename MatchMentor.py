@@ -108,13 +108,13 @@ class VideoPlayer(QMainWindow):
     @pyqtSlot()
     def next_frame(self):
         if self.cap is not None and self.current_frame + 1 < self.total_frames:
-            self.current_frame += 1
+            self.current_frame += 10
             self.update_frame()
 
     @pyqtSlot()
     def previous_frame(self):
         if self.cap is not None and self.current_frame - 1 >= 0:
-            self.current_frame -= 1
+            self.current_frame -= 10
             self.update_frame()
 
     def update_frame(self):

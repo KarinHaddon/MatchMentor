@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchMentor</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login/login.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight" type="text/css">
+
+</head>
+
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="container">
+        <form class="form">
+            <div class="banner">
+                <h2><span class="match">Match</span><span class="mentor">Mentor</span></h2>
+                <div class="button-group">
+                    <a href="/landing" class="button">Back</a>
+                </div>
+            </div>
+            <div class="box-title">
+                <h2>Log in</h2>
+            </div>
+            <div class="input-group">
+                <label for="username"> Username: </label><br />
+                <input type="text" id="username" name="username" required /><br />
+                <label for="password"> Password: </label><br />
+                <input type="password" id="password" name="password" required /><br />
+            </div>
+            <br />
+            <div class="button-group">
+                <button id="login_submit" class = "button">Submit</button>
+                <a href="/register" class="button">Register</a>
+            </div>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#login_submit").click(function () {
+                var username = $("#username").val();
+                var password = $("#password").val();
+
+                $.ajax({
+                    url: '/login_submitpress',
+                    type: 'POST',
+                    data: {
+                        username: username,
+                        password: password
+                    },
+                    success: function (response) {
+                        console.log("Button press registered");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
