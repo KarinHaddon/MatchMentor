@@ -47,6 +47,15 @@ FOREIGN KEY (userID) REFERENCES stats(userID)
 
 );
 
+CREATE TABLE gamevideos (
+    videoID INT,
+    GamesID INT,
+    filename VARCHAR(255) NOT NULL,
+    data LONGBLOB NOT NULL,
+    PRIMARY KEY (videoid, gamesid),
+    FOREIGN KEY (gamesid) REFERENCES games(gamesid)
+);
+
 
 
 

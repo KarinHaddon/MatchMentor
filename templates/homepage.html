@@ -4,169 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: "Inter Tight", Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            font-size: 100%;
-        }
-
-        .background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('stadium-4760441.jpg') no-repeat center center fixed;
-            background-size: cover;
-            z-index: 1;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            z-index: 2;
-        }
-
-        .banner {
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: rgb(255, 255, 255);
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 3;
-        }
-
-        .banner h2 {
-            font-size: 22px;
-            color: black;
-            margin: 0;
-            padding-left: 5px;
-        }
-
-        .banner .match {
-            color: #000000;
-        }
-
-        .banner .mentor {
-            color: #33AFFF;
-        }
-
-        .button {
-            padding: 8px 15px;
-            font-size: 16px;
-            text-align: center;
-            justify-content: center;
-            cursor: pointer;
-            outline: none;
-            color: #fff;
-            background-color: #000000;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            box-shadow: 0 4px #6e6e6e;
-            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-        }
-
-        .button:hover {
-            background-color: #3684ea;
-        }
-
-        .button:active {
-            background-color: #3684ea;
-            box-shadow: 0 2px #666;
-            transform: translateY(2px);
-        }
-
-        .button.change-text::after {
-            content: ' +';
-            display: none;
-        }
-
-        .button.change-text:hover::after {
-            display: inline;
-        }
-
-        .button.change-text:hover span {
-            display: none;
-        }
-
-        .title-heading {
-            text-align: left;
-            padding-left: 30px;
-            margin-top: 100px;
-            margin-bottom: 20px;
-            z-index: 4;
-            position: relative;
-        }
-
-        .container {
-            background-color: #f0f0f0;
-            padding: 20px;
-            margin: 0 20px 20px 20px;
-            flex: 1;
-            border-radius: 10px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            z-index: 4;
-            position: relative;
-        }
-
-        .description-box {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .description-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .description-box h3 {
-            margin-bottom: 10px;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .description-box p {
-            color: #555;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homepage/homepage.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight" type="text/css">
+    <title>MatchMentor</title>
 </head>
 
 <body>
@@ -175,7 +15,6 @@
     <div class="banner">
         <h2><span class="match">Match</span><span class="mentor">Mentor</span></h2>
         <div class="button-group">
-            <a href="/labelling" class="button change-text"><span>Add Game</span></a>
             <a href="/stats" class="button">Statistics</a>
             <a href="/login" class="button">Log out</a>
         </div>
@@ -185,18 +24,26 @@
     </div>
     <div class="container">
         {% if games %}
-        {% for game in games %}
-        <div class="description-box">
-            <h3>Game {{ game.game_number }}</h3> 
-            <p>Date: {{ game.GameDate }}</p>
-            <p>Team 1: {{ game.Team1 }}</p>
-            <p>Team 2: {{ game.Team2 }}</p>
-        </div>
-        {% endfor %}
+            {% for game in games %}
+                <div class="description-box" onclick="window.location.href='/stats'">
+                    <h3>Game {{ game.game_number }}</h3>
+                    <p>Date: {{ game.GameDate }}</p>
+                    <p>Team 1: {{ game.Team1 }}</p>
+                    <p>Team 2: {{ game.Team2 }}</p>
+                </div>
+            {% endfor %}
+            {% if (games|length) < 8 %}
+                <div class="add-game-box" onclick="window.location.href='/labelling'">
+                    +
+                </div>
+            {% endif %}
         {% else %}
-        <div class="description-box">
-            <h3>Add a game to get started!</h3>
-        </div>
+            <div class="description-box">
+                <h3>Add a game to get started!</h3>
+            </div>
+            <div class="add-game-box" onclick="window.location.href='/labelling'">
+                +
+            </div>
         {% endif %}
     </div>
 </body>
