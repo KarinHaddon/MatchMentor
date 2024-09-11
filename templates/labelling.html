@@ -14,28 +14,64 @@
     <div class="overlay"></div>
     <div class="container">
         <div class="left-container">
-            <div class="video-box">
-                {% if video_filename %}
-                    <video width="100%" controls>
-                        <source src="{{ url_for('static', filename='uploads/videos/' ~ video_filename) }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                {% else %}
-                    <p>No video uploaded yet.</p>
-                {% endif %}
+            <div class="gray-box">
+                <!-- Display the extracted frame if available -->
+                <div class="frame-container">
+                    {% if frame_path %}
+                    <img src="{{ url_for('static', filename=frame_path) }}" alt="Extracted Frame">
+                    {% else %}
+                    <p>No frame available yet.</p>
+                    {% endif %}
+                </div>
             </div>
-            <form action="{{ url_for('upload_video') }}" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="gamesid" value="{{ gamesid }}">
-                <label for="video">Choose video file:</label>
-                <input type="file" name="video" id="video" accept=".mp4, .avi, .mov, .wmv, .flv" required>
-                <br>
-                <button type="submit">Upload Video</button>
-            </form>
+            <div class="form-container">
+                <form action="{{ url_for('upload_video') }}" method="post" enctype="multipart/form-data">
+                    <label for="video">Choose video file:</label>
+                    <input type="file" name="video" id="video" accept=".mp4, .avi, .mov, .wmv, .flv" required>
+                    <br><br>
+                    <button type="submit">Upload Video</button>
+                </form>
+            </div>
         </div>
+
         <div class="right-container">
+            <!-- Main Labelling Section -->
+            <div class="form-box">
+                <h2>Labelling</h2>
+                <div class="buttons-container">
+                    <div class="section">
+                        <h3>Possession</h3>
+                        <button type="button" onclick="setTeam('your_team')">Your Team</button>
+                        <button type="button" onclick="setTeam('other_team')">Other Team</button>
+                    </div>
+                    <div class="section">
+                        <h3>In Play</h3>
+                        <button type="button" onclick="setInPlay('true')">True</button>
+                        <button type="button" onclick="setInPlay('false')">False</button>
+                    </div>
+                </div>
+                <div class="bottom-buttons-container">
+                    <button class="bottom-left-button">Previous Frame</button>
+                    <form action="{{ url_for('next_frame') }}" method="post">
+                        <input type="hidden" name="frame_number" value="{{ frame_number }}">
+                        <input type="hidden" name="video_path" value="{{ video_path }}">
+                        <input type="hidden" id="selected_team" name="selected_team" value="">
+                        <input type="hidden" id="in_play_value" name="in_play_value" value="">
+                        <input type = "hidden" name = "gameID" value="{{ gameID }}">
+                        <button type="submit" class="bottom-right-button">Next Frame</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Collapsible Sidebar for Add Game -->
+        <div id="add-game-sidebar" class="add-game-sidebar">
+            <button id="close-sidebar" class="close-btn">X</button>
             <div class="form-box">
                 <h2>Add Game</h2>
-                <form method="post" action="/add_game">
+                <form action="{{ url_for('add_game') }}" method="post">
+                    <input type="hidden" name="gamesID" value="{{ gamesID }}">
                     <label for="game_date">Game Date:</label>
                     <input type="date" id="game_date" name="game_date" required>
 
@@ -47,12 +83,38 @@
 
                     <button type="submit">Add Game</button>
                 </form>
-                <div class="button-group">
-                    <a href="/homepage" class="button">Back to Homepage</a>
-                </div>
             </div>
         </div>
+
+        <!-- Open Sidebar Button -->
+        <button id="open-sidebar" class="open-btn">Add Game</button>
     </div>
+
+    <script>
+        // Toggle the sidebar
+        const openSidebarBtn = document.getElementById('open-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+        const sidebar = document.getElementById('add-game-sidebar');
+
+        openSidebarBtn.addEventListener('click', () => {
+            sidebar.style.display = 'block';
+            openSidebarBtn.style.display = 'none';
+        });
+
+        closeSidebarBtn.addEventListener('click', () => {
+            sidebar.style.display = 'none';
+            openSidebarBtn.style.display = 'block';
+        });
+
+        function setTeam(team){
+            document.getElementById('selected_team').value=team;
+            sessionStorage.setItem('selectedTeam',team);
+        }
+        function setInPlay(inPlay){
+            document.getElementById('in_play_value').value=inPlay;
+            sessionStorage.setItem('inPlayValue',inPlay);
+        }
+    </script>
 </body>
 
 </html>

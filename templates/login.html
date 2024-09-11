@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MatchMentor</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login/login.css') }}">
+    <!--google Fonts for improved typography -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight" type="text/css">
     
 </head>
@@ -14,10 +15,12 @@
     <div class="background"></div>
     <div class="overlay"></div>
     <div class="container">
+        <!--form with POST method for secure submission -->
         <form class="form" method="post" action="/login_submitpress">
             <div class="banner">
                 <h2><span class="match">Match</span><span class="mentor">Mentor</span></h2>
                 <div class="button-group">
+                    <!--links to the Register and Back pages-->
                     <a href="/register" class="button">Register</a>
                     <a href="/landing" class="button">Back</a>
                 </div>
@@ -26,6 +29,7 @@
                 <h2>Log in</h2>
             </div>
             <div class="input-group">
+                <!--input fields for username and password with required validation-->
                 <label for="username"> Username: </label><br />
                 <input type="text" id="username" name="username" required /><br />
                 <label for="password"> Password: </label><br />
@@ -41,20 +45,26 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
+            //event handler for login button click
             $("#login_submit").click(function (event) {
-                event.preventDefault();  // Prevent the default form submission
+                event.preventDefault();
+                //capture user input values
                 var username = $("#username").val();
                 var password = $("#password").val();
-
+                //AJAX request to send login details to the server
                 $.ajax({
+                    //server endpoint to handle login
                     url: '/login_submitpress',
+                    //post method to submit data securely
                     type: 'POST',
                     data: {
+                        //data sent to server
                         username: username,
                         password: password
                     },
                     success: function (response) {
                         console.log("Button press registered");
+                        //redirect user based on the servers response
                         if (response.redirect) {
                             window.location.href = response.redirect;
                         }

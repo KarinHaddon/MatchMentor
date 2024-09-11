@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MatchMentor</title>
+    <!-- Link to external CSS page-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register/register.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight" type="text/css">
     
@@ -17,6 +18,7 @@
         <form id="registerForm">
             <div class="banner">
                 <h2><span class="match">Match</span><span class="mentor">Mentor</span></h2>
+                <!--Links to other pages-->
                 <div class="button-group">
                     <a href="/login" class="button">Log in</a>
                     <a href="/landing" class="button">Back</a>
@@ -25,6 +27,7 @@
             <div class="box-title">
                 <h2>Register</h2>
             </div>
+            <!-- input fields for username and password-->
             <div class="input-group">
                 <label for="username">Create Username:</label><br />
                 <input type="text" id="username" name="username" required /><br />
@@ -36,14 +39,19 @@
         </form>
         <div id="result" class="message"></div>
     </div>
+    <!-- jQuery library for easier DOM manipulation to modify the html document 
+    for the web browser and AJAX allowing the user to interact with the page without
+    constant page reloading  -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
+            //event handler for form submission
             $("#registerForm").submit(function (event) {
-                event.preventDefault();  // Prevent the default form submission
+                event.preventDefault(); 
+                //get the values from the form inputs
                 var username = $("#username").val();
                 var password = $("#password").val();
-
+                //perform an AJAX POST request to the server
                 $.ajax({
                     url: '/register_submitpress',
                     type: 'POST',
@@ -53,11 +61,14 @@
                     },
                     success: function (response) {
                         console.log("Button press registerd")
+                        //redirect based on the server response
                         if (response.redirect) {
                             window.location.href = response.redirect;
                         }
                     },
                     error: function (xhr, status, error) {
+                        //if it doesnt work then send an error message from the server 
+                        //response
                         var response = JSON.parse(xhr.responseText);
                         $("#result").removeClass('success').addClass('error').html(response.error);
                     }
