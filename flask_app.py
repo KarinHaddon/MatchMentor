@@ -104,35 +104,40 @@ def login_submit_press():
         conn.close()
         return jsonify({"error": "Please enter both fields"}), 400
 
-@app.route('/add_game', methods=['POST'])
+@app.route('/addgame', methods=['POST'])
 def add_game():
     conn = connect()
     cursor = conn.cursor(dictionary=True)
 
     userID = session.get('user_id')
-    gameID = session.get('gameID')
+
+    # If no gameID in session, generate a new one
     
+    select_query = "SELECT GamesID FROM games ORDER BY GamesID DESC LIMIT 1"
+    cursor.execute(select_query)
+    result = cursor.fetchone()
+    lGameID = result['GamesID'] if result else 0
+    gameID = int(lGameID) + 1
+    session['gameID'] = gameID  # Save to session for future use
+    
+    # Add the game details
     game_date = request.form.get('game_date')
     team1 = request.form.get('team1')
     team2 = request.form.get('team2')
 
-    if gameID and game_date and team1 and team2:
-        update_query = """
-            UPDATE games
-            SET GameDate = %s, Team1 = %s, Team2 = %s, userID = %s
-            WHERE GamesID = %s
+    if game_date and team1 and team2:
+        insert_game_query = """
+            INSERT INTO games (GamesID, GameDate, Team1, Team2, userID) 
+            VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(update_query, (game_date, team1, team2, userID, gameID))
+        cursor.execute(insert_game_query, (gameID, game_date, team1, team2, userID))
         conn.commit()
 
         cursor.close()
         conn.close()
         
-        return redirect(url_for('homepage'))
-    
-    cursor.close()
-    conn.close()
-    return 'Error adding game'
+    return redirect(url_for('homepage'))
+
 
 @app.route('/login')
 def login():
@@ -216,22 +221,22 @@ def upload_video():
             cv2.imwrite(frame_path, frame)
         video_capture.release()
 
-        conn = connect()
-        cursor = conn.cursor(dictionary=True)
-        select_query = "SELECT GamesID FROM games ORDER BY GamesID DESC LIMIT 1"
-        cursor.execute(select_query)
-        result = cursor.fetchone()
-        lGameID = result['GamesID'] if result else 0
-        gameID = int(lGameID) + 1
+        # conn = connect()
+        # cursor = conn.cursor(dictionary=True)
+        # select_query = "SELECT GamesID FROM games ORDER BY GamesID DESC LIMIT 1"
+        # cursor.execute(select_query)
+        # result = cursor.fetchone()
+        # lGameID = result['GamesID'] if result else 0
+        # gameID = int(lGameID) + 1
 
-        insert_game_query = "INSERT INTO games (GamesID, userID, GameDate, Team1, Team2) VALUES (%s, NULL, NULL, NULL, NULL)"
-        cursor.execute(insert_game_query, (gameID,))
-        conn.commit()
+        # insert_game_query = "INSERT INTO games (GamesID, userID, GameDate, Team1, Team2) VALUES (%s, NULL, NULL, NULL, NULL)"
+        # cursor.execute(insert_game_query, (gameID,))
+        # conn.commit()
 
-        session['gameID'] = gameID
+        #session['gameID'] = gameID
 
-        cursor.close()
-        conn.close()
+        #cursor.close()
+        #conn.close()
 
         #redirect to labelling page, passing the video path and first frame details
         return redirect(url_for('labelling', frame_filename=frame_filename, frame_number=1, video_path=filepath))
@@ -250,11 +255,40 @@ def labelling():
     gameID = session.get('gameID')
 
     if not gameID:
-        cursor.close()
-        conn.close()
-        return 'Game ID not found in session', 400
 
-    print("GamesID: "+str(gameID))
+        userID = session.get('user_id')
+
+        # If no gameID in session, generate a new one
+    
+        select_query = "SELECT GamesID FROM games ORDER BY GamesID DESC LIMIT 1"
+        cursor.execute(select_query)
+        result = cursor.fetchone()
+        lGameID = result['GamesID'] if result else 0
+        gameID = int(lGameID) + 1
+
+        insert_game_query = "INSERT INTO games (GamesID, userID, GameDate, Team1, Team2) VALUES (%s, NULL, NULL, NULL, NULL)"
+        cursor.execute(insert_game_query, (gameID,))
+        conn.commit()
+
+        session['gameID'] = gameID  # Save to session for future use
+    
+        # Add the game details
+        game_date = request.form.get('game_date')
+        team1 = request.form.get('team1')
+        team2 = request.form.get('team2')
+
+        if game_date and team1 and team2:
+            insert_game_query = """
+                INSERT INTO games (GamesID, GameDate, Team1, Team2, userID) 
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_game_query, (gameID, game_date, team1, team2, userID))
+            conn.commit()
+    
+
+    print("GamesID: " + str(gameID))
+    
+    # Ensure that frame_path exists for the labelling page
     if frame_filename:
         frame_path = f'images/{frame_filename}'
     else:
@@ -263,7 +297,7 @@ def labelling():
     cursor.close()
     conn.close()
 
-    return render_template('labelling.html', frame_path=frame_path, frame_number=frame_number, video_path=video_path, gameID = gameID)
+    return render_template('labelling.html', frame_path=frame_path, frame_number=frame_number, video_path=video_path, gameID=gameID)
 
 @app.route('/serve_frame')
 def serve_frame():
@@ -283,12 +317,14 @@ def serve_frame():
 @app.route('/next_frame', methods=['POST'])
 def next_frame():
 
+
     conn = connect()
     cursor = conn.cursor(dictionary=True)
     
     frame_number = int(request.form.get('frame_number', 0))
     video_path = request.form.get('video_path')
-    gameID = session.get('gameID')
+    gameID = (session.get('gameID')) 
+    print(f"GameID being used for labeling: {gameID}")
 
     selected_team = request.form.get('selected_team')
     in_play_value = request.form.get('in_play_value')
@@ -341,12 +377,38 @@ def next_frame():
 
     video_capture.release()
 
-    # Redirect back to labelling with the updated frame
     return redirect(url_for('labelling', frame_filename=frame_filename, frame_number=frame_number, video_path=video_path, gameID = gameID))
 
-@app.route('/stats')
-def stats():
-    return render_template('stats.html')
+@app.route('/stats/<int:gameID>')
+def stats(gameID):
+    conn = connect()
+    cursor = conn.cursor(dictionary=True)
+
+    # Query to get the game details by gameID
+    select_query = """
+    SELECT 
+        GamesID, 
+        GameDate, 
+        Team1, 
+        Team2,
+        ROW_NUMBER() OVER (ORDER BY GameDate) as game_number
+    FROM 
+        games
+    WHERE 
+        GamesID = %s;
+    """
+    
+    cursor.execute(select_query, (gameID,))
+    game = cursor.fetchone()  # Fetch one record
+    print(game)  # Debug: Print the fetched game details
+
+    cursor.close()
+    conn.close()
+
+    if game:
+        return render_template('stats.html', game=game)
+    else:
+        return "Game not found", 404
 
 
 def show_frame(frame_path):
@@ -357,4 +419,3 @@ def show_frame(frame_path):
 
 if __name__ == "__main__":
     app.run(debug=True, port=5500)
-

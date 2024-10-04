@@ -89,22 +89,3 @@ body {
     box-shadow: 0 2px #666;
     transform: translateY(2px);
 }
-
-.video-container {
-    z-index: 5;
-    position: fixed;
-    top: 100px;
-    right: 0;
-    width: 30%;
-    height: 80vh;
-    background-color: #f0f0f0;
-    padding: 20px;
-    padding-right: 1200px;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-}
-
-.heading {
-    z-index: 6;
-
-}
