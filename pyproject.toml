@@ -25,6 +25,7 @@ dependencies = [
     "ipdb",
     "ipykernel",
     "isort",
+    "jaxtyping",
     "jupyter",
     "jupyterlab",
     "flask",
@@ -45,8 +46,9 @@ dependencies = [
     "scipy",
     "seaborn",
     "setuptools",
-    "torch>=2.0.1[cuda12]",
-    "torchvision>=0.15.2+cu12",
+    "torch @ https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-cp311-cp311-win_amd64.whl",
+    "torchvision @ https://download.pytorch.org/whl/cu121/torchvision-0.20.1%2Bcu121-cp311-cp311-win_amd64.whl",
+    "tqdm",
     "twine>=1.11.0",
     "wandb",
     "wheel",
@@ -60,6 +62,12 @@ Repository = "https://github.com/KarinHaddon/MatchMentor"
 [project.optional-dependencies]
 dev = []
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+MatchMentor = ["py.typed"]
+
 [tool.setuptools.packages.find]
 exclude = [
     "*.tests",
@@ -71,14 +79,14 @@ exclude = [
     "data"
 ]
 
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.package-data]
-MatchMentor = ["py.typed"]
-
 [tool.setuptools.dynamic]
 version = {attr = "MatchMenttor.version.VERSION"}
+
+[tool.pip]
+extra-index-url = [
+    "https://pypi.org/simple",
+    "https://my-custom-index-url.com/simple"
+]
 
 [tool.isort]
 profile = "black"
@@ -89,9 +97,11 @@ select = ["E", "W", "F", "I", "D", "UP", "S", "B", "A", "C4", "ICN", "PIE", "PT"
 line-length = 99
 ignore = [
     "E201", "E202", "E203", "E231", "E731", "E702",
-    "S101",
+    "D107",
+    "F722",
+    "PLR0912", "PLR0913", "PLR0915",
     "PT013",
-    "PLR0912", "PLR0913", "PLR0915"
+    "S101",
 ]
 extend-exclude = [".git", ".github", ".idea", ".vscode"]
 fix = true
