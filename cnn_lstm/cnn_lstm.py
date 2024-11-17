@@ -19,11 +19,11 @@ from torchvision.models import DenseNet201_Weights, ResNet34_Weights
 from tqdm import tqdm
 
 # Constants
+batch_sz = 8  # local: 4
+n_classes = 4
 frame_shape = (3, 224, 224)  # (n_channels, height, width)
 n_channels, height, width = frame_shape[0], frame_shape[1], frame_shape[2]
-n_classes = 4
-batch_sz = 4
-seq_len = 10  # Number of frames
+seq_len = 10  # number of frames in each sequence
 
 
 class CNNLSTM(nn.Module):
@@ -34,7 +34,7 @@ class CNNLSTM(nn.Module):
             lstm_input_sz: int,  # size of input features expected by LSTM
             lstm_hidden_sz: int,  # number of neurons in each lstm hidden layer
             lstm_n_layers: int,  # number of lstm layers
-            n_classes: int,  # number of output classes
+            n_classes: int = n_classes,  # number of output classes
             dropout: float = 0.15,  # dropout rate
         ):
         super().__init__()
@@ -292,7 +292,7 @@ def objective(
 ) -> float:  # -> final validation loss
     """Optuna objective function."""
     # 1. Sample Hyperparameters
-    seq_len = trial.suggest_categorical("seq_len", [10, 15])  # 15, 20, 25, 30
+    seq_len = trial.suggest_categorical("seq_len", [15, 20, 25, 30])  # (for local: [10, 15])
     dropout = trial.suggest_float("dropout", 0.0, 0.4)
     optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "AdamW"])
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)
@@ -358,8 +358,10 @@ def objective(
 # Run optuna study
 if __name__ == "__main__":
     # Set up params
-    labels_path = Path(r"C:\Users\jai\MatchMentor\cnn_lstm\data\LSTMLabels.csv")
-    frames_path = Path(r"C:\Users\jai\MatchMentor\cnn_lstm\data\frames")
+    # local: labels_path = Path(r"C:\Users\jai\MatchMentor\cnn_lstm\data\LSTMLabels.csv")
+    # local: frames_path = Path(r"C:\Users\jai\MatchMentor\cnn_lstm\data\frames")
+    labels_path = Path("~").expanduser() / "MatchMentorData" / "LSTMLabels.csv"
+    frames_path = Path("~").expanduser() / "MatchMentorData" / "frames"
     cnn = models.densenet201(weights=DenseNet201_Weights.DEFAULT)
 
     # Set up and run optuna study
