@@ -1,4 +1,4 @@
-models/*
-data/*
+models/
+data/
 *.egg*
 __pycache__/*
