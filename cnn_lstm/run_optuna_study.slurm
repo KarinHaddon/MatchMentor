@@ -10,4 +10,4 @@ source $HOME/mambaforge/etc/profile.d/conda.sh
 conda activate matchmentor
 
 # Run the Python module
-python $HOME/MatchMentor/cnn_lstm/cnn_lstm.py
+python -u $HOME/MatchMentor/cnn_lstm/cnn_lstm.py
