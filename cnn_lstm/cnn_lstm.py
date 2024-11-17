@@ -268,7 +268,7 @@ def load_data(
 
     # Load frames and set input
     frames_dir = Path(frames_path)
-    frame_files = sorted(frames_dir.glob("*.png"), key=lambda x: int(x.stem))
+    frame_files = sorted(frames_dir.glob("*.png"), key=lambda x: int(x.stem.split('_')[1]))
     transform = transforms.Compose([transforms.Resize((height, width)), transforms.ToTensor()])
     X_init = torch.stack(
         [transform(Image.open(f).convert("RGB")) for f in frame_files]
@@ -355,28 +355,34 @@ def objective(
     return val_losses_avg[-1]
 
 
-# Run as script
+# Run optuna study
 if __name__ == "__main__":
-    # Load pre-trained CNN model
-    cnn = models.resnet34(pretrained=True)
-    cnn = cnn.to(dtype=bfloat16)
+    # Set up params
+    labels_path = Path(r"C:\Users\jai\MatchMentor\cnn_lstm\data\LSTMLabels.csv")
+    frames_path = Path(r"C:\Users\jai\MatchMentor\cnn_lstm\data\frames")
+    cnn = models.densenet201(weights=DenseNet201_Weights.DEFAULT)
 
-    # Set paths
-    labels_path = Path("data/labels.csv")
-    frames_path = Path("data/frames")
-
-    # Run Optuna study
-    study = optuna.create_study(direction="minimize")
+    # Set up and run optuna study
+    study = optuna.create_study(direction="minimize", study_name="CNN-LSTM")
     study.optimize(
-        lambda trial: objective(trial, labels_path, frames_path, cnn),
-        n_trials=5,
-        timeout=600,
+        lambda trial: objective(
+            trial,
+            labels_path=labels_path,
+            frames_path=frames_path,
+            cnn=cnn,
+        ),
+        n_trials=50,
+        timeout=60 * 60
     )
 
+    # View some results
+    # Print info on all trials and best trial
+    print(f"Number of finished trials: {len(study.trials)} \n")
     print("Best trial:")
-    print(study.best_trial)
-    print("Best params:")
+    trial = study.best_trial
+    print(f"  Validation Loss: {trial.value}")
+    print("  Best hyperparameters: \n\n")
+    for key, value in trial.params.items():
+        print(f"  {key}: {value}")
+
     print(study.best_params)
-    print("Best value:")
-    print(study.best_value)
-    print("Finished.")
