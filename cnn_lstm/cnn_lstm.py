@@ -374,7 +374,6 @@ if __name__ == "__main__":
             cnn=cnn,
         ),
         n_trials=50,
-        timeout=60 * 60
     )
 
     # View some results
