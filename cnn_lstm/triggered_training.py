@@ -4,24 +4,22 @@ import argparse
 import os
 import time
 from pathlib import Path
+from pyexpat import model
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
-import optuna
 import pandas as pd
 import submitit
 import torch
-from jaxtyping import Float, Int
+from jaxtyping import Float
 from PIL import Image
 from torch import Tensor, bfloat16, nn, optim
 from torch.utils.data import DataLoader, TensorDataset, random_split
 from torchvision import models, transforms
-from torchvision.models import DenseNet201_Weights, ResNet34_Weights
+from torchvision.models import DenseNet201_Weights
 from tqdm import tqdm
 
 
-# Define CNN-LSTM model
 class CNNLSTM(nn.Module):
     """CNN-LSTM for video event classification."""
 
@@ -108,7 +106,7 @@ class CNNLSTM(nn.Module):
         return output
 
     def weights_init(self):
-        """Initialize the weights of the CNN and LSTM layers using Xavier init."""
+        """Initializes the weights of the CNN and LSTM layers using Xavier init."""
         for _, module in self.named_modules():
             if isinstance(module, nn.Linear | nn.Conv2d):
                 nn.init.xavier_uniform_(module.weight)
@@ -127,9 +125,9 @@ def train(
     train_loader: DataLoader,  # training data loader
     val_loader: DataLoader,  # validation data loader
     optimizer: optim.Optimizer,  # optimization algorithm
-    max_epochs: int = 2,  # maximum number of epochs to train for
+    max_epochs: int = 5,  # maximum number of epochs to train for
     max_batches: int = 100_000,  # maximum number of batches to train for
-    val_every: int = 100,  # validate every n batch
+    val_every: int = 200,  # validate every n batch
     val_iter: int = 5,  # number of batches on val_loader to run and avg for val loss
     patience_thresh: int = 500,  # consecutive batches w/ no val loss decrease for early stop
 ) -> tuple[
@@ -176,13 +174,7 @@ def train(
     # <s Trackers
     _batch_sz, n_batches = train_loader.batch_size, len(train_loader)
     batch_lim = min(max_batches, n_batches * max_epochs)
-    train_losses, val_losses, train_losses_avg, val_losses_avg, batch_times = (
-        [],
-        [],
-        [],
-        [],
-        [],
-    )
+    train_losses, val_losses, train_losses_avg, val_losses_avg, batch_times = [], [], [], [], []
     best_val_loss = float("inf")
     patience_ct = 0
     # /s>
@@ -263,7 +255,7 @@ def load_data_training(
     Float[Tensor, "n_sequences seq_len n_channels height width"],  # X
     Float[Tensor, "n_sequences num_classes"],  # Y
 ]:
-    """Returns inputs and target outputs for the CNN-LSTM model."""
+    """Returns inputs and target outputs to train the CNN-LSTM model."""
     # Load labels and set target outputs
     labels_df = pd.read_csv(labels_path)
     label_cols = ["Possession", "Passing", "InPlay", "Goals"]
@@ -297,8 +289,7 @@ def load_data_inference(
 ) -> tuple[
     Float[Tensor, "n_sequences seq_len n_channels height width"],  # X
 ]:
-    """Returns inputs and target outputs for the CNN-LSTM model."""
-
+    """Returns inputs for inference via the trained CNN-LSTM model."""
     # Load frames from video
     frames_dir = Path.cwd() / "data/frames_inference"
     frames_dir.mkdir(exist_ok=True, parents=True)
@@ -329,20 +320,124 @@ def load_data_inference(
     return X
 
 
-def run_training_then_inference():
-    # Run training on training frames
-    # Run inference on frames from full video
-    # Send predictions for all frames back to database
-    pass
+def run_training_then_inference(
+    model: CNNLSTM,
+    optimizer: optim.Optimizer,
+    batch_sz: int,
+    labels_file: Path,
+    frames_dir: Path,
+    vid_file: Path,
+    output_dir: Path,  # path to save the trained model and inference results
+):
+    """Trains the model on training frames, then runs inference on frames from full video."""
+    # Wait for 'run_training.txt' file to appear in the output_dir before proceeding
+    t0, mins = time.time(), 0
+    while not (output_dir / "run_training.txt").exists():
+        time.sleep(0.5)
+        if round(time.time() - t0) % 60 == 0:
+            mins += 1
+            print(f"Still waiting for training-trigger, it's been {mins} minutes.")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # <s Run training on training frames
+    # Load training data
+    X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
+    train_dataset = TensorDataset(X_train, Y_train)
+    train_ratio, val_ratio, test_ratio = 0.85, 0.1, 0.05
+    train_data, val_data, test_data = random_split(
+        train_dataset, [train_ratio, val_ratio, test_ratio]
+    )
+    train_loader = DataLoader(train_data, batch_size=batch_sz, shuffle=True, num_workers=16)
+    val_loader = DataLoader(val_data, batch_size=batch_sz, shuffle=True, num_workers=16)
+    _test_loader = DataLoader(test_data, batch_size=batch_sz, shuffle=False, num_workers=16)
+
+    # Train model
+    _loss, _train_losses_avg, _val_losses_avg, _batch_times = train(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+    )
+
+    # Save trained model
+    output_dir.mkdir(exist_ok=True, parents=True)
+    model_path = output_dir / "cnn_lstm_model.pth"
+    torch.save(model.state_dict(), model_path)
+    # /s>
+
+    # <s Run inference on frames from full video
+    # Load frames from video
+    X_inference = load_data_inference(seq_len, vid_file)
+    inference_dataset = TensorDataset(X_inference)
+    inference_loader = DataLoader(
+        inference_dataset, batch_size=batch_sz, shuffle=False, num_workers=16
+    )
+
+    # Run inference
+    probs_list = []  # list of class probabilities for each frame
+    model.eval()
+    with torch.no_grad:
+        pbar = tqdm(enumerate(inference_loader), desc="Inference progression")
+        for _batch_i, X_batch in pbar:
+            logits = model(X_batch.to(device))
+            probs = torch.sigmoid(logits)
+            probs_list.append(probs.cpu().numpy())
+
+    # Save inference results
+    probs_array = np.concatenate(probs_list, axis=0)  # -> [n_sequences, n_classes]
+
+    # Compute frame numbers corresponding to each prediction: each prediction corresponds to the
+    # last frame in its input sequence.
+    n_sequences = probs_array.shape[0]
+    n_frames = n_sequences + seq_len - 1
+    frame_numbers = list(range(seq_len - 1, n_frames))
+
+    # Create dataframe with predictions to save to csv
+    class_names = ["Possession", "Passing", "InPlay", "Goals"]
+    df = pd.DataFrame(probs_array, columns=class_names)
+    df.insert(0, "frame_number", frame_numbers)
+    output_csv = output_dir / "inference_predictions.csv"
+    df.to_csv(output_csv, index=False)
+    print(f"Inference results saved to {output_csv}")
+    # /s>
+
+    # <s Send predictions for all frames back to database via `os.system`
+    # /s>
+
 
 if __name__ == "__main__":
+    # Constants (based on previous optuna hyperparameter sweeps)
+    n_classes = 4  # output classes: possession, pass, in-play, goal
+    frame_shape = (3, 224, 224)
+    n_channels, height, width = frame_shape[0], frame_shape[1], frame_shape[2]
+    batch_sz = 8
+    seq_len = 30  # number of frames in each sequence
+    dropout = 0.1
+    lr = 5e-4
+    beta1 = 0.98
+    beta2 = 0.95
+    weight_decay = 2.5e-5
+    lstm_input_sz, lstm_hidden_sz = 512, 512
+    n_lstm_layers = 2
+
+    # Create model
+    cnn = models.densenet201(weights=DenseNet201_Weights.DEFAULT)
+    model = CNNLSTM(cnn, lstm_input_sz, lstm_hidden_sz, n_lstm_layers, n_classes, dropout)
+    model.weights_init()
+    optimizer = optim.Adam(
+        model.parameters(), lr=lr, betas=(beta1, beta2), weight_decay=weight_decay, fused=True
+    )
+
     # Argparser: labels_path, frames_path, vid_path
-    parser = argparse.ArgumentParser(description="Triggered model training with Submitit.")
+    parser = argparse.ArgumentParser(description="Triggered model training with submitit.")
     parser.add_argument("--labels-file", type=str, required=True, help="Full path to labels file.")
-    parser.add_argument("--frames-dir", type=str, required=True, help="Full path to frames directory.")
+    parser.add_argument("--frames-dir", type=str, required=True, help="Full path to frames dir.")
     parser.add_argument("--vid-file", type=str, required=True, help="Full path to video file.")
-    parser.add_argument("--slurm-output-dir", type=str, required=True, help="SLURM out & err dir.")
-    parser.add_argument("--model-output-dir", type=str, required=True, help="Model output dir.")
+    parser.add_argument(
+        "--model-output-dir", type=str, required=True, help="Full path to model output dir."
+    )
+    parser.add_argument(
+        "--slurm-output-dir", type=str, required=True, help="Full path to SLURM out & err dir."
+    )
     parser.add_argument("--partition", type=str, default="gpu_branco", help="SLURM partition.")
     parser.add_argument("--slurm-job-name", type=str, default="trig_mm_t&i", help="SLURM job name.")
     args = parser.parse_args()
@@ -362,28 +457,12 @@ if __name__ == "__main__":
     # Submit the job
     job = executor.submit(
         run_training_then_inference,
-        args.study_path,
-        args.db_name,
-        args.study_name,
-        args.n_tasks,
-        args.n_trials,
+        model,
+        optimizer,
+        batch_sz,
         args.labels_file,
+        args.frames_dir,
+        args.vid_file,
         args.model_output_dir,
-        args.save_outputs
     )
     print(f"Submitted job ID: {job.job_id}")
-
-    # Constants (based on previous optuna hyperparameter sweeps)
-    n_classes = 4  # output classes: possession, pass, in-play, goal
-    frame_shape = (3, 224, 224)
-    n_channels, height, width = frame_shape[0], frame_shape[1], frame_shape[2]
-    batch_sz = 8
-    seq_len = 30  # number of frames in each sequence
-    dropout = 0.1
-    lr = 0.0005
-    beta1 = 0.98
-    beta2 = 0.95
-    weight_decay = 2.5e-5
-    lstm_input_sz, lstm_hidden_sz = 512, 512
-
-    pass
