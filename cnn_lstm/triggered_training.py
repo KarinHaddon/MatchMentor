@@ -404,6 +404,12 @@ def run_training_then_inference(
     # /s>
 
     # <s Send predictions for all frames back to database via `os.system`
+    # scp_command = (
+    #     f"scp ~/MatchMentor/data/{output_csv} "
+    #     "KARIN-LAPTOP:C:\\Users\\karin\\MatchMentor\\static\\output.csv"
+    # )
+    # os.system(scp_command)  # noqa: S605
+    # print(f"csv sent back")
     # /s>
 
 
