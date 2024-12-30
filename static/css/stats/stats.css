@@ -9,7 +9,6 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    font-size: 100%;
     z-index: 0;
 }
 
@@ -52,8 +51,6 @@ body {
 .banner h2 {
     font-size: 22px;
     color: black;
-    margin: 0;
-    padding-left: 5px;
 }
 
 .banner .match {
@@ -68,9 +65,7 @@ body {
     padding: 8px 15px;
     font-size: 16px;
     text-align: center;
-    justify-content: center;
     cursor: pointer;
-    outline: none;
     color: #fff;
     background-color: #000000;
     border: none;
@@ -90,21 +85,77 @@ body {
     transform: translateY(2px);
 }
 
-.video-container {
-    z-index: 5;
-    position: fixed;
-    top: 100px;
-    right: 0;
-    width: 30%;
-    height: 80vh;
-    background-color: #f0f0f0;
+.content-container {
+    display: flex;
+    justify-content: space-between;
     padding: 20px;
-    padding-right: 1200px;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
+    margin-top: 80px; 
+    z-index: 3;
+    height: calc(100vh - 120px);  /* Makes the layout adjust based on the available viewport height */
 }
 
-.heading {
-    z-index: 6;
+/* Left section contains the info and video */
+.left-section {
+    width: 53%;
+    display: flex;
+    flex-direction: column;
+}
 
+/* Game info container is smaller and above the video */
+.game-info-container {
+    background-color: #f0f0f0;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.video-container {
+    background-color: #ffffff;
+    padding: 10px;
+    padding-left: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+h1, h3, p {
+    margin-bottom: 15px;
+}
+
+p {
+    font-size: 18px;
+}
+
+/* Right section with scrollable graph container */
+.graph-section {
+    width: 45%;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow-y: auto;  /* Enables vertical scrolling */
+    max-height: calc(100vh - 100px);  /* Adjust to the available space */
+}
+
+/* Graph boxes */
+.graph-box {
+    height: 150px;
+    background-color: #e0e0e0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    font-size: 18px;
+    color: #333;
+}
+
+.graph-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.graph-section h3 {
+    margin-bottom: 20px;
 }

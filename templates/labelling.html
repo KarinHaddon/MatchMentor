@@ -37,30 +37,51 @@
         <div class="right-container">
             <!-- Main Labelling Section -->
             <div class="form-box">
-                <h2>Labelling</h2>
+                <h2>Your Team</h2>
                 <div class="buttons-container">
-                    <div class="section">
+                    <div class="section possession">
                         <h3>Possession</h3>
-                        <button type="button" onclick="setTeam('your_team')">Your Team</button>
-                        <button type="button" onclick="setTeam('other_team')">Other Team</button>
+                        <div class="section-buttons">
+                            <button type="button" onclick="toggleSelection(this, 'possession');setTeam('true')">True</button>
+                            <button type="button" onclick="toggleSelection(this, 'possession');setTeam('false')">False</button>
+                        </div>
                     </div>
-                    <div class="section">
+
+                    <div class="section inplay">
                         <h3>In Play</h3>
-                        <button type="button" onclick="setInPlay('true')">True</button>
-                        <button type="button" onclick="setInPlay('false')">False</button>
+                        <div class="section-buttons">
+                            <button type="button" onclick="toggleSelection(this, 'inplay');setInPlay('true')">True</button>
+                            <button type="button" onclick="toggleSelection(this, 'inplay');setInPlay('false')">False</button>
+                        </div>
+                    </div>
+
+                    <div class="section passing">
+                        <h3>Passing</h3>
+                        <div class="section-buttons">
+                            <button type="button" onclick="toggleSelection(this, 'passing');setPass('true')">True</button>
+                            <button type="button" onclick="toggleSelection(this, 'passing');setPass('false')">False</button>
+                        </div>
+                    </div>
+
+                    <div class="section goal">
+                        <h3>Goal</h3>
+                        <div class="section-buttons">
+                            <button type="button" onclick="toggleSelection(this, 'goal');setGoal('true')">True</button>
+                            <button type="button" onclick="toggleSelection(this, 'goal');setGoal('false')">False</button>
+                        </div>
                     </div>
                 </div>
-                <div class="bottom-buttons-container">
-                    <button class="bottom-left-button">Previous Frame</button>
-                    <form action="{{ url_for('next_frame') }}" method="post">
-                        <input type="hidden" name="frame_number" value="{{ frame_number }}">
-                        <input type="hidden" name="video_path" value="{{ video_path }}">
-                        <input type="hidden" id="selected_team" name="selected_team" value="">
-                        <input type="hidden" id="in_play_value" name="in_play_value" value="">
-                        <input type = "hidden" name = "gameID" value="{{ gameID }}">
-                        <button type="submit" class="bottom-right-button">Next Frame</button>
-                    </form>
-                </div>
+                <button class="section-buttons">Previous Frame</button>
+                <form action="{{ url_for('next_frame') }}" method="post">
+                    <input type="hidden" name="frame_number" value="{{ frame_number }}">
+                    <input type="hidden" name="video_path" value="{{ video_path }}">
+                    <input type="hidden" id="selected_team" name="selected_team" value="">
+                    <input type="hidden" id="in_play_value" name="in_play_value" value="">
+                    <input type="hidden" id="passing_value" name="passing_value" value="">
+                    <input type="hidden" id="goal_value" name="goal_value" value="">
+                    <input type="hidden" name="gameID" value="{{ gameID }}">
+                    <button type="submit" class="section-buttons">Next Frame</button>
+                </form>
             </div>
 
         </div>
@@ -86,12 +107,10 @@
             </div>
         </div>
 
-        <!-- Open Sidebar Button -->
         <button id="open-sidebar" class="open-btn">Add Game</button>
     </div>
 
     <script>
-        // Toggle the sidebar
         const openSidebarBtn = document.getElementById('open-sidebar');
         const closeSidebarBtn = document.getElementById('close-sidebar');
         const sidebar = document.getElementById('add-game-sidebar');
@@ -106,13 +125,26 @@
             openSidebarBtn.style.display = 'block';
         });
 
-        function setTeam(team){
-            document.getElementById('selected_team').value=team;
-            sessionStorage.setItem('selectedTeam',team);
+        function setTeam(team) {
+            document.getElementById('selected_team').value = team;
+            sessionStorage.setItem('selectedTeam', team);
         }
-        function setInPlay(inPlay){
-            document.getElementById('in_play_value').value=inPlay;
-            sessionStorage.setItem('inPlayValue',inPlay);
+        function setInPlay(inPlay) {
+            document.getElementById('in_play_value').value = inPlay;
+            sessionStorage.setItem('inPlayValue', inPlay);
+        }
+        function setPass(pass) {
+            document.getElementById('passing_value').value = pass;
+            sessionStorage.setItem('PassValue', pass);
+        }
+        function setGoal(goal) {
+            document.getElementById('goal_value').value = goal;
+            sessionStorage.setItem('GoalValue', goal);
+        }
+        function toggleSelection(button, group) {
+            const buttons = document.querySelectorAll(`.${group} button`);
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
         }
     </script>
 </body>

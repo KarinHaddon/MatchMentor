@@ -159,8 +159,8 @@ body {
 }
 
 .section {
+    display: flex;
     flex-direction: column;
-    /* Stack heading and buttons vertically */
     align-items: center;
     text-align: center;
     padding-left: 47px;
@@ -172,13 +172,19 @@ body {
 }
 
 .section button {
-    /* Space between buttons */
-    
+    margin: 0 10px; /* Add margin between buttons */
     border: none;
     background-color: #3684ea;
     color: #fff;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
+}
+
+.section-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px; /* Adds space between buttons */
 }
 
 .section button:hover {
@@ -188,6 +194,11 @@ body {
 .section button:active {
     background-color: #1a47a0;
     transform: translateY(2px);
+}
+
+.section button.selected {
+    background-color: grey; 
+    color: white;
 }
 
 .form-box {
@@ -300,18 +311,21 @@ body {
 
 .bottom-buttons-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 10px; /* Adds space between the buttons */
     margin-top: auto;
 }
 
 .bottom-left-button,
 .bottom-right-button {
-    border: none;
-    font-size: 13px;
-    width: auto;
-    flex-grow: 0;
+    flex-grow: 1; /* Allows both buttons to grow equally */
+    max-width: 150px; /* Limit their size to match "True" and "False" buttons */
+    padding: 10px 20px; /* Adjust padding for consistent height */
+    font-size: 16px;
+    text-align: center;
     background-color: #3684ea;
     color: #fff;
+    border: none;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
 }
@@ -323,8 +337,12 @@ body {
 
 .bottom-left-button:active,
 .bottom-right-button:active {
-    background-color:#3684ea;
+    background-color: #3684ea;
     transform: translateY(2px);
+}
+
+.form button {
+    width: 100%;
 }
 .add-game-sidebar {
     position: fixed;

@@ -18,22 +18,38 @@
             <a href="/homepage" class="button">Back</a>
         </div>
     </div>
-    <div class="heading">
-        <h1>Game {{ game.game_number }} Stats</h1>
+
+    <div class="content-container">
+        <div class="left-section">
+            <div class="game-info-container">
+                <h2>Game Stats</h2>
+                <p>Date: {{ game.GameDate }}</p>
+                <p>Team 1: {{ game.Team1 }} Team 2: {{ game.Team2 }}</p>
+            </div>
+
+            <div class="video-container">
+                {% if video_path %}
+                <video controls width="600">
+                    <source src="{{ url_for('static', filename=video_path) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                {% else %}
+                <p>No video available for this game.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="graph-section">
+            <div class="graph-container">
+                <h3>Graphs</h3>
+                <div class="graph-box">Graph 1</div>
+                <div class="graph-box">Graph 2</div>
+                <div class="graph-box">Graph 3</div>
+                <div class="graph-box">Graph 4</div>
+                <div class="graph-box">Graph 5</div>
+            </div>
+        </div>
     </div>
-    <div class="video-container">
-        <p>Date: {{ game.GameDate }}</p>
-        <p>Team 1: {{ game.Team1 }}</p>
-        <p>Team 2: {{ game.Team2 }}</p>
-    </div>
-    <!-- <div class="video-container">
-        <h3>Game Video</h3>
-        <p>Video Path: {{ video_path }}</p>
-        <video controls width="600">
-            <source src="{{ url_for('static', filename=video_path) }}" type="video/mp4" />
-            Your browser does not support the video tag.
-        </video>
-    </div> -->
 </body>
 
 </html>
