@@ -337,6 +337,9 @@ def run_training_then_inference(
         if round(time.time() - t0) % 60 == 0:
             mins += 1
             print(f"Still waiting for training-trigger, it's been {mins} minutes.")
+            if mins > 30:
+                print("Exiting due to timeout.")
+                return
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # <s Run training on training frames
     # Load training data
