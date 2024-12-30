@@ -331,6 +331,7 @@ def run_training_then_inference(
 ):
     """Trains the model on training frames, then runs inference on frames from full video."""
     # Wait for 'run_training.txt' file to appear in the output_dir before proceeding
+    output_dir.mkdir(exist_ok=True, parents=True)
     t0, mins = time.time(), 0
     while not (output_dir / "run_training.txt").exists():
         time.sleep(0.5)
@@ -362,7 +363,6 @@ def run_training_then_inference(
     )
 
     # Save trained model
-    output_dir.mkdir(exist_ok=True, parents=True)
     model_path = output_dir / "cnn_lstm_model.pth"
     torch.save(model.state_dict(), model_path)
     # /s>
@@ -458,7 +458,8 @@ if __name__ == "__main__":
     executor.update_parameters(
         slurm_job_name=args.slurm_job_name,
         slurm_partition=args.partition,
-        slurm_gpus_per_task=1,
+        # nodes=1,
+        # gpus_per_node=1,
         cpus_per_task=32,
         mem_gb=64,
     )
