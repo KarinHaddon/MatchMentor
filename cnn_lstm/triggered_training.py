@@ -473,6 +473,6 @@ if __name__ == "__main__":
         args.labels_file,
         args.frames_dir,
         args.vid_file,
-        args.model_output_dir,
+        Path(args.model_output_dir),
     )
     print(f"Submitted job ID: {job.job_id}")
