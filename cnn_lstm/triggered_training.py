@@ -351,7 +351,7 @@ def run_training_then_inference(
     # Load training data
     X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
     train_dataset = TensorDataset(X_train, Y_train)
-    train_ratio, val_ratio, test_ratio = 0.85, 0.1, 0.05
+    train_ratio, val_ratio, _test_ratio = 0.85, 0.1, 0.05
     data_size = len(train_dataset)
     train_size = int(train_ratio * data_size)
     val_size = int(val_ratio * data_size)
