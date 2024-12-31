@@ -180,9 +180,9 @@ def train(
     # /s>
 
     # <s Training loop
-    for epoch in range(max_epochs):
-        pbar = tqdm(enumerate(train_loader), total=batch_lim, desc="Batch progression")
-        for batch_i, (x_train, y_train) in pbar:
+    pbar = tqdm(total=batch_lim, desc="Batch progression")
+    for epoch_i in range(max_epochs):
+        for batch_i, (x_train, y_train) in enumerate(train_loader):
             start_time = time.time()
             # <ss Model training.
             optimizer.zero_grad()
@@ -195,6 +195,9 @@ def train(
             optimizer.step()
             train_losses.append(loss.item())
             batch_times.append(time.time() - start_time)
+            pbar.update(1)
+            total_batch_num = (batch_i + 1) * (epoch_i + 1)
+            pbar.set_postfix_str(f"Total Batch {total_batch_num} / {batch_lim}")
             # /ss>
             # <ss Model validation.
             if val_every and batch_i % val_every == 0:
@@ -207,25 +210,24 @@ def train(
                     train_losses,
                     train_losses_avg,
                 )
-                print_losses(epoch, batch_i, train_losses_avg, val_losses_avg)
-                pbar.set_postfix_str(f"Total Batch {(batch_i + 1) * (epoch + 1)} / {batch_lim}")
+                print_losses(epoch_i, batch_i, train_losses_avg, val_losses_avg)
                 # Patience check for early stopping.
                 patience_ct = 0 if val_losses_avg[-1] < best_val_loss else patience_ct + val_every
                 best_val_loss = min(best_val_loss, val_losses_avg[-1])
                 if patience_ct >= patience_thresh:
                     print("Early stopping.")
-                    print_losses(epoch, batch_i, train_losses_avg, val_losses_avg)
+                    print_losses(epoch_i, batch_i, train_losses_avg, val_losses_avg)
                     return loss, train_losses_avg, val_losses_avg, batch_times
             # Max batch check.
-            if (batch_i + 1) * (epoch + 1) >= max_batches:
+            if (batch_i + 1) * (epoch_i + 1) >= max_batches:
                 print("Finished training:")
-                print_losses(epoch, batch_i, train_losses_avg, val_losses_avg)
+                print_losses(epoch_i, batch_i, train_losses_avg, val_losses_avg)
                 return loss, train_losses_avg, val_losses_avg, batch_times
             # /ss>
         # /s>
 
     print("Finished training:")
-    print_losses(epoch, batch_i, train_losses_avg, val_losses_avg)  # type: ignore
+    print_losses(epoch_i, batch_i, train_losses_avg, val_losses_avg)  # type: ignore
     return loss, train_losses_avg, val_losses_avg, batch_times  # type: ignore
 
 
@@ -284,6 +286,7 @@ def load_data_training(
 def load_data_inference(
     seq_len: int,  # number of frames in each sequence
     vid_path: Path,  # path to the full video
+    frames_write_path: Path,  # path to write frames to
     height=224,  # image height
     width=224,  # image width
 ) -> tuple[
@@ -291,9 +294,11 @@ def load_data_inference(
 ]:
     """Returns inputs for inference via the trained CNN-LSTM model."""
     # Load frames from video
-    frames_dir = Path.cwd() / "data/frames_inference"
+    frames_dir = frames_write_path / "data/frames_inference"
     frames_dir.mkdir(exist_ok=True, parents=True)
     cap = cv2.VideoCapture(str(vid_path))
+    if not cap.isOpened():
+        raise ValueError(f"Error opening video file: {vid_path}")
     frame_i = 0
     while cap.isOpened():
         ret, frame = cap.read()
@@ -373,7 +378,7 @@ def run_training_then_inference(
 
     # <s Run inference on frames from full video
     # Load frames from video
-    X_inference = load_data_inference(seq_len, vid_file)
+    X_inference = load_data_inference(seq_len, vid_file, output_dir)
     inference_dataset = TensorDataset(X_inference)
     inference_loader = DataLoader(
         inference_dataset, batch_size=batch_sz, shuffle=False, num_workers=16
