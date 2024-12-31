@@ -469,7 +469,7 @@ if __name__ == "__main__":
         slurm_job_name=args.slurm_job_name,
         slurm_partition=args.partition,
         cpus_per_task=32,
-        mem_gb=64,
+        mem_gb=128,
         slurm_time=60*10
     )
 
