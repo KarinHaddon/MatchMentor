@@ -336,6 +336,7 @@ def run_training_then_inference(
 ):
     """Trains the model on training frames, then runs inference on frames from full video."""
     # Wait for 'run_training.txt' file to appear in the output_dir before proceeding
+    X_inference = load_data_inference(seq_len, vid_file, output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
     t0, mins = time.time(), 0
     while not (output_dir / "run_training.txt").exists():
