@@ -296,18 +296,18 @@ def load_data_inference(
     # Load frames from video
     frames_dir = frames_write_path / "data/frames_inference"
     frames_dir.mkdir(exist_ok=True, parents=True)
-    cap = cv2.VideoCapture(("/" + str(vid_path)))
-    if not cap.isOpened():
-        raise ValueError(f"Error opening video file: {vid_path}")
-    frame_i = 0
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frame_path = frames_dir / f"frame_{frame_i}.png"
-        cv2.imwrite(str(frame_path), frame)
-        frame_i += 1
-    cap.release()
+    # cap = cv2.VideoCapture(("/" + str(vid_path)))
+    # if not cap.isOpened():
+    #     raise ValueError(f"Error opening video file: {vid_path}")
+    # frame_i = 0
+    # while cap.isOpened():
+    #     ret, frame = cap.read()
+    #     if not ret:
+    #         break
+    #     frame_path = frames_dir / f"frame_{frame_i}.png"
+    #     cv2.imwrite(str(frame_path), frame)
+    #     frame_i += 1
+    # cap.release()
     # Sort and preprocess frames
     frame_files = sorted(
         frames_dir.glob("*.png"), key=lambda x: int(x.stem.split("_")[1])
