@@ -347,8 +347,12 @@ def run_training_then_inference(
     X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
     train_dataset = TensorDataset(X_train, Y_train)
     train_ratio, val_ratio, test_ratio = 0.85, 0.1, 0.05
+    data_size = len(train_dataset)
+    train_size = int(train_ratio * data_size)
+    val_size = int(val_ratio * data_size)
+    test_size = int(test_ratio * data_size)
     train_data, val_data, test_data = random_split(
-        train_dataset, [train_ratio, val_ratio, test_ratio]
+        train_dataset, [train_size, val_size, test_size]
     )
     train_loader = DataLoader(train_data, batch_size=batch_sz, shuffle=True, num_workers=16)
     val_loader = DataLoader(val_data, batch_size=batch_sz, shuffle=True, num_workers=16)
@@ -458,8 +462,6 @@ if __name__ == "__main__":
     executor.update_parameters(
         slurm_job_name=args.slurm_job_name,
         slurm_partition=args.partition,
-        # nodes=1,
-        # gpus_per_node=1,
         cpus_per_task=32,
         mem_gb=64,
         slurm_time=60*10
