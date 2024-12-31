@@ -296,7 +296,7 @@ def load_data_inference(
     # Load frames from video
     frames_dir = frames_write_path / "data/frames_inference"
     frames_dir.mkdir(exist_ok=True, parents=True)
-    cap = cv2.VideoCapture(str(vid_path))
+    cap = cv2.VideoCapture(("/" + str(vid_path)))
     if not cap.isOpened():
         raise ValueError(f"Error opening video file: {vid_path}")
     frame_i = 0
