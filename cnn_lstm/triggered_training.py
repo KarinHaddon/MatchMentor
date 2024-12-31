@@ -462,7 +462,7 @@ if __name__ == "__main__":
         # gpus_per_node=1,
         cpus_per_task=32,
         mem_gb=64,
-        slurm_time=60*4
+        slurm_time=60*10
     )
 
     # Submit the job
