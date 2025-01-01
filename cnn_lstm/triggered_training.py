@@ -390,11 +390,11 @@ def run_training_then_inference(
 
     # <s Run inference on frames from full video
     cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
-    print(f"\n\nStarting inference: ({cur_time})")
+    print(f"\n\nStarting inference; loading frames from video for inference: ({cur_time})")
     # Load frames from video
     X_inference = load_data_inference(seq_len, vid_file, output_dir)
     cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
-    print(f"\n\nFinished loading frames from video for inference; now running model: ({cur_time})")
+    print(f"Finished loading frames; now running model: ({cur_time})")
 
     # Create dataset for inference
     inference_dataset = TensorDataset(X_inference)
