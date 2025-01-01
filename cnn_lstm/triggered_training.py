@@ -1,8 +1,10 @@
 """Waits for a trigger to start training on HPC via submitit."""
 
 import argparse
+from calendar import c
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 from pyexpat import model
 
@@ -127,8 +129,8 @@ def train(
     optimizer: optim.Optimizer,  # optimization algorithm
     max_epochs: int = 5,  # maximum number of epochs to train for
     max_batches: int = 100_000,  # maximum number of batches to train for
-    val_every: int = 200,  # validate every n batch
-    val_iter: int = 5,  # number of batches on val_loader to run and avg for val loss
+    val_every: int = 20,  # validate every n batch
+    val_iter: int = 3,  # number of batches on val_loader to run and avg for val loss
     patience_thresh: int = 500,  # consecutive batches w/ no val loss decrease for early stop
 ) -> tuple[
     torch.Tensor, list, list, list
@@ -226,7 +228,7 @@ def train(
             # /ss>
         # /s>
 
-    print("Finished training:")
+    print("\n\nFinished training:")
     print_losses(epoch_i, batch_i, train_losses_avg, val_losses_avg)  # type: ignore
     return loss, train_losses_avg, val_losses_avg, batch_times  # type: ignore
 
@@ -336,6 +338,8 @@ def run_training_then_inference(
 ):
     """Trains the model on training frames, then runs inference on frames from full video."""
     # Wait for 'run_training.txt' file to appear in the output_dir before proceeding
+    cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n\nWaiting for training-trigger: ({cur_time})")
     output_dir.mkdir(exist_ok=True, parents=True)
     t0, mins = time.time(), 0
     while not (output_dir / "run_training.txt").exists():
@@ -347,38 +351,52 @@ def run_training_then_inference(
                 print("Exiting due to timeout.")
                 return
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # <s Run training on training frames
-    # Load training data
-    X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
-    train_dataset = TensorDataset(X_train, Y_train)
-    train_ratio, val_ratio, _test_ratio = 0.85, 0.1, 0.05
-    data_size = len(train_dataset)
-    train_size = int(train_ratio * data_size)
-    val_size = int(val_ratio * data_size)
-    test_size = data_size - train_size - val_size
-    train_data, val_data, test_data = random_split(
-        train_dataset, [train_size, val_size, test_size]
-    )
-    train_loader = DataLoader(train_data, batch_size=batch_sz, shuffle=True, num_workers=16)
-    val_loader = DataLoader(val_data, batch_size=batch_sz, shuffle=True, num_workers=16)
-    _test_loader = DataLoader(test_data, batch_size=batch_sz, shuffle=False, num_workers=16)
 
-    # Train model
-    _loss, _train_losses_avg, _val_losses_avg, _batch_times = train(
-        model=model,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        optimizer=optimizer,
-    )
+    # # <s Run training on training frames
+    # cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    # print(f"\n\nStarting training: ({cur_time})")
+    # # Load training data
+    # X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
+    # train_dataset = TensorDataset(X_train, Y_train)
+    # # train_ratio, val_ratio, _test_ratio = 0.85, 0.1, 0.05
+    # train_ratio, _val_ratio = 0.95, 0.05
+    # data_size = len(train_dataset)
+    # train_size = int(train_ratio * data_size)
+    # # val_size = int(val_ratio * data_size)
+    # # test_size = data_size - train_size - val_size
+    # val_size = data_size - train_size
+    # # train_data, val_data, test_data = random_split(
+    # #     train_dataset, [train_size, val_size, test_size]
+    # # )
+    # train_data, val_data = random_split(train_dataset, [train_size, val_size])
+    # train_loader = DataLoader(train_data, batch_size=batch_sz, shuffle=True, num_workers=32)
+    # val_loader = DataLoader(val_data, batch_size=batch_sz, shuffle=True, num_workers=32)
+    # # _test_loader = DataLoader(test_data, batch_size=batch_sz, shuffle=False, num_workers=16)
 
-    # Save trained model
-    model_path = output_dir / "cnn_lstm_model.pth"
-    torch.save(model.state_dict(), model_path)
-    # /s>
+    # # Train model
+    # _loss, _train_losses_avg, _val_losses_avg, _batch_times = train(
+    #     model=model,
+    #     train_loader=train_loader,
+    #     val_loader=val_loader,
+    #     optimizer=optimizer,
+    # )
+
+    # # Save trained model
+    # model_path = output_dir / "cnn_lstm_model.pth"
+    # torch.save(model.state_dict(), model_path)
+    # cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    # print(f"\n\nFinished training: ({cur_time})")
+    # # /s>
 
     # <s Run inference on frames from full video
+    cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n\nStarting inference: ({cur_time})")
     # Load frames from video
     X_inference = load_data_inference(seq_len, vid_file, output_dir)
+    cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n\nFinished loading frames from video for inference; now running model: ({cur_time})")
+
+    # Create dataset for inference
     inference_dataset = TensorDataset(X_inference)
     inference_loader = DataLoader(
         inference_dataset, batch_size=batch_sz, shuffle=False, num_workers=16
@@ -387,7 +405,7 @@ def run_training_then_inference(
     # Run inference
     probs_list = []  # list of class probabilities for each frame
     model.eval()
-    with torch.no_grad:
+    with torch.no_grad():
         pbar = tqdm(enumerate(inference_loader), desc="Inference progression")
         for _batch_i, X_batch in pbar:
             logits = model(X_batch.to(device))
@@ -409,7 +427,8 @@ def run_training_then_inference(
     df.insert(0, "frame_number", frame_numbers)
     output_csv = output_dir / "inference_predictions.csv"
     df.to_csv(output_csv, index=False)
-    print(f"Inference results saved to {output_csv}")
+    cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n\nFinished inference. Results saved to {output_csv}: ({cur_time})")
     # /s>
 
     # <s Send predictions for all frames back to database via `os.system`
@@ -430,7 +449,7 @@ if __name__ == "__main__":
     batch_sz = 8
     seq_len = 30  # number of frames in each sequence
     dropout = 0.1
-    lr = 5e-4
+    lr = 0.00075
     beta1 = 0.98
     beta2 = 0.95
     weight_decay = 2.5e-5
@@ -467,7 +486,7 @@ if __name__ == "__main__":
     executor.update_parameters(
         slurm_job_name=args.slurm_job_name,
         slurm_partition=args.partition,
-        cpus_per_task=32,
+        cpus_per_task=48,
         mem_gb=128,
         slurm_time=60*10
     )
