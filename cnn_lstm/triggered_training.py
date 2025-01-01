@@ -437,7 +437,8 @@ def run_training_then_inference(
     #     "KARIN-LAPTOP:C:\\Users\\karin\\MatchMentor\\static\\output.csv"
     # )
     # os.system(scp_command)  # noqa: S605
-    # print(f"csv sent back")
+    # cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    # print(f"\n\nSent predictions back to database: ({cur_time})")
     # /s>
 
 
