@@ -399,7 +399,7 @@ def run_training_then_inference(
     # Create dataset for inference
     inference_dataset = TensorDataset(X_inference)
     inference_loader = DataLoader(
-        inference_dataset, batch_size=batch_sz, shuffle=False, num_workers=16
+        inference_dataset, batch_size=batch_sz, shuffle=False, num_workers=32
     )
 
     # Run inference
