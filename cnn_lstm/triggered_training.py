@@ -410,10 +410,11 @@ def run_training_then_inference(
         for _batch_i, (X_batch,) in pbar:
             logits = model(X_batch.to(device))
             probs = torch.sigmoid(logits)
-            probs_list.append(probs.cpu().numpy())
+            probs_list.append(probs.to(dtype=torch.float32).cpu().numpy())
 
     # Save inference results
     probs_array = np.concatenate(probs_list, axis=0)  # -> [n_sequences, n_classes]
+    print(f"{probs_array.shape=}")
 
     # Compute frame numbers corresponding to each prediction: each prediction corresponds to the
     # last frame in its input sequence.
