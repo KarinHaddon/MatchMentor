@@ -298,18 +298,18 @@ def load_data_inference(
     # Load frames from video
     frames_dir = frames_write_path / "data/frames_inference"
     frames_dir.mkdir(exist_ok=True, parents=True)
-    # cap = cv2.VideoCapture(("/" + str(vid_path)))
-    # if not cap.isOpened():
-    #     raise ValueError(f"Error opening video file: {vid_path}")
-    # frame_i = 0
-    # while cap.isOpened():
-    #     ret, frame = cap.read()
-    #     if not ret:
-    #         break
-    #     frame_path = frames_dir / f"frame_{frame_i}.png"
-    #     cv2.imwrite(str(frame_path), frame)
-    #     frame_i += 1
-    # cap.release()
+    cap = cv2.VideoCapture(("/" + str(vid_path)))
+    if not cap.isOpened():
+        raise ValueError(f"Error opening video file: {vid_path}")
+    frame_i = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame_path = frames_dir / f"frame_{frame_i}.png"
+        cv2.imwrite(str(frame_path), frame)
+        frame_i += 1
+    cap.release()
     # Sort and preprocess frames
     frame_files = sorted(
         frames_dir.glob("*.png"), key=lambda x: int(x.stem.split("_")[1])
@@ -352,41 +352,41 @@ def run_training_then_inference(
                 return
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # # <s Run training on training frames
-    # cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
-    # print(f"\n\nStarting training: ({cur_time})")
-    # # Load training data
-    # X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
-    # train_dataset = TensorDataset(X_train, Y_train)
-    # # train_ratio, val_ratio, _test_ratio = 0.85, 0.1, 0.05
-    # train_ratio, _val_ratio = 0.95, 0.05
-    # data_size = len(train_dataset)
-    # train_size = int(train_ratio * data_size)
-    # # val_size = int(val_ratio * data_size)
-    # # test_size = data_size - train_size - val_size
-    # val_size = data_size - train_size
-    # # train_data, val_data, test_data = random_split(
-    # #     train_dataset, [train_size, val_size, test_size]
-    # # )
-    # train_data, val_data = random_split(train_dataset, [train_size, val_size])
-    # train_loader = DataLoader(train_data, batch_size=batch_sz, shuffle=True, num_workers=32)
-    # val_loader = DataLoader(val_data, batch_size=batch_sz, shuffle=True, num_workers=32)
-    # # _test_loader = DataLoader(test_data, batch_size=batch_sz, shuffle=False, num_workers=16)
-
-    # # Train model
-    # _loss, _train_losses_avg, _val_losses_avg, _batch_times = train(
-    #     model=model,
-    #     train_loader=train_loader,
-    #     val_loader=val_loader,
-    #     optimizer=optimizer,
+    # <s Run training on training frames
+    cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n\nStarting training: ({cur_time})")
+    # Load training data
+    X_train, Y_train = load_data_training(seq_len, labels_file, frames_dir)
+    train_dataset = TensorDataset(X_train, Y_train)
+    # train_ratio, val_ratio, _test_ratio = 0.85, 0.1, 0.05
+    train_ratio, _val_ratio = 0.95, 0.05
+    data_size = len(train_dataset)
+    train_size = int(train_ratio * data_size)
+    # val_size = int(val_ratio * data_size)
+    # test_size = data_size - train_size - val_size
+    val_size = data_size - train_size
+    # train_data, val_data, test_data = random_split(
+    #     train_dataset, [train_size, val_size, test_size]
     # )
+    train_data, val_data = random_split(train_dataset, [train_size, val_size])
+    train_loader = DataLoader(train_data, batch_size=batch_sz, shuffle=True, num_workers=32)
+    val_loader = DataLoader(val_data, batch_size=batch_sz, shuffle=True, num_workers=32)
+    # _test_loader = DataLoader(test_data, batch_size=batch_sz, shuffle=False, num_workers=16)
 
-    # # Save trained model
-    # model_path = output_dir / "cnn_lstm_model.pth"
-    # torch.save(model.state_dict(), model_path)
-    # cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
-    # print(f"\n\nFinished training: ({cur_time})")
-    # # /s>
+    # Train model
+    _loss, _train_losses_avg, _val_losses_avg, _batch_times = train(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+    )
+
+    # Save trained model
+    model_path = output_dir / "cnn_lstm_model.pth"
+    torch.save(model.state_dict(), model_path)
+    cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n\nFinished training: ({cur_time})")
+    # /s>
 
     # <s Run inference on frames from full video
     cur_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
