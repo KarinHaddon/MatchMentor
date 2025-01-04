@@ -127,9 +127,9 @@ def train(
     train_loader: DataLoader,  # training data loader
     val_loader: DataLoader,  # validation data loader
     optimizer: optim.Optimizer,  # optimization algorithm
-    max_epochs: int = 5,  # maximum number of epochs to train for
+    max_epochs: int = 21,  # maximum number of epochs to train for
     max_batches: int = 100_000,  # maximum number of batches to train for
-    val_every: int = 20,  # validate every n batch
+    val_every: int = 25,  # validate every n batch
     val_iter: int = 3,  # number of batches on val_loader to run and avg for val loss
     patience_thresh: int = 500,  # consecutive batches w/ no val loss decrease for early stop
 ) -> tuple[
@@ -291,14 +291,12 @@ def load_data_inference(
     frames_write_path: Path,  # path to write frames to
     height=224,  # image height
     width=224,  # image width
-) -> tuple[
-    Float[Tensor, "n_sequences seq_len n_channels height width"],  # X
-]:
+) -> Float[Tensor, "n_sequences seq_len n_channels height width"]:  # X
     """Returns inputs for inference via the trained CNN-LSTM model."""
     # Load frames from video
     frames_dir = frames_write_path / "data/frames_inference"
     frames_dir.mkdir(exist_ok=True, parents=True)
-    cap = cv2.VideoCapture(("/" + str(vid_path)))
+    cap = cv2.VideoCapture("/" + str(vid_path))
     if not cap.isOpened():
         raise ValueError(f"Error opening video file: {vid_path}")
     frame_i = 0
@@ -451,7 +449,7 @@ if __name__ == "__main__":
     batch_sz = 8
     seq_len = 30  # number of frames in each sequence
     dropout = 0.1
-    lr = 0.00075
+    lr = 0.00005
     beta1 = 0.98
     beta2 = 0.95
     weight_decay = 2.5e-5
@@ -490,7 +488,7 @@ if __name__ == "__main__":
         slurm_partition=args.partition,
         cpus_per_task=48,
         mem_gb=128,
-        slurm_time=60*10
+        slurm_time=60*36
     )
 
     # Submit the job
