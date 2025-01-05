@@ -131,7 +131,7 @@ def train(
     max_batches: int = 100_000,  # maximum number of batches to train for
     val_every: int = 25,  # validate every n batch
     val_iter: int = 3,  # number of batches on val_loader to run and avg for val loss
-    patience_thresh: int = 500,  # consecutive batches w/ no val loss decrease for early stop
+    patience_thresh: int = 2000,  # consecutive batches w/ no val loss decrease for early stop
 ) -> tuple[
     torch.Tensor, list, list, list
 ]:  # -> final loss, train losses, val losses, batch_times
@@ -449,9 +449,9 @@ if __name__ == "__main__":
     batch_sz = 8
     seq_len = 30  # number of frames in each sequence
     dropout = 0.1
-    lr = 0.00005
-    beta1 = 0.98
-    beta2 = 0.95
+    lr = 1e-4
+    beta1 = 0.95
+    beta2 = 0.98
     weight_decay = 2.5e-5
     lstm_input_sz, lstm_hidden_sz = 512, 512
     n_lstm_layers = 2
