@@ -1,9 +1,10 @@
 
 
-CREATE TABLE Users (
+CREATE TABLE users (
 userID INT PRIMARY KEY,
 username VARCHAR(255),
-password VARCHAR(255)
+password VARCHAR(255),
+salt VARCHAR(255)
 );
 
 CREATE TABLE Games (
@@ -12,6 +13,7 @@ userID INT,
 GameDate DATE,
 Team1 VARCHAR(255),
 Team2 VARCHAR(255),
+videoPath VARCHAR(255),
 FOREIGN KEY (userID) REFERENCES users(userID)
 
 );
@@ -21,39 +23,43 @@ GamesID INT,
 Frame INT,
 Posession INT,
 InPlay INT,
+Passing INT,
+Goal INT,
 PRIMARY KEY (GamesID,Frame),
 FOREIGN KEY (GamesID) REFERENCES games(GamesID)
 
 );
 
-CREATE TABLE stats (
-GamesID INT,
-userID INT,
-posession INT,
-goals INT,
-PRIMARY KEY (GamesID),
-FOREIGN KEY (GamesID) REFERENCES games(GamesID),
-FOREIGN KEY (userID) REFERENCES games(userID)
-
+CREATE TABLE individual_stats (
+    GamesID INT,               
+    userID INT,                
+    TotalPossessionTime FLOAT,  
+    TotalInPlayTime FLOAT,      
+    TotalPasses INT,            
+    SuccessfulPasses INT,       
+    FailedPasses INT,           
+    PassSuccessRate FLOAT,      
+    GoalsScored INT,            
+    PossessionPercentage FLOAT, 
+    TimePerPossession FLOAT,
+    PRIMARY KEY (userID, GamesID),
+    FOREIGN KEY (GamesID) REFERENCES games(GamesID)
 );
 
-CREATE TABLE overallStats (
-userID INT,
-posession INT,
-goals INT,
-inPlay INT,
-PRIMARY KEY (userID),
-FOREIGN KEY (userID) REFERENCES stats(userID)
-
-);
-
-CREATE TABLE gamevideos (
-    videoID INT,
-    GamesID INT,
-    filename VARCHAR(255) NOT NULL,
-    data LONGBLOB NOT NULL,
-    PRIMARY KEY (videoid, gamesid),
-    FOREIGN KEY (gamesid) REFERENCES games(gamesid)
+CREATE TABLE overall_stats (
+    StatsID INT AUTO_INCREMENT PRIMARY KEY,
+    userID INT,                
+    TotalGamesPlayed INT,       
+    TotalPossessionTime FLOAT,  
+    TotalInPlayTime FLOAT,      
+    TotalPasses INT,            
+    SuccessfulPasses INT,       
+    FailedPasses INT,           
+    PassSuccessRate FLOAT,     
+    TotalGoalsScored INT,       
+    AvgPossessionPercentage FLOAT, 
+    GoalsPerGame FLOAT,
+    FOREIGN KEY (userID) REFERENCES users(userID)
 );
 
 

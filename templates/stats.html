@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stats/stats.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight" type="text/css">
     <title>MatchMentor</title>
@@ -22,9 +23,9 @@
     <div class="content-container">
         <div class="left-section">
             <div class="game-info-container">
-                <h2>Game Stats</h2>
+                <h2>Game Information</h2>
                 <p>Date: {{ game.GameDate }}</p>
-                <p>Team 1: {{ game.Team1 }} Team 2: {{ game.Team2 }}</p>
+                <p>Opposition: {{ game.Team2 }}</p>
             </div>
 
             <div class="video-container">
@@ -41,9 +42,121 @@
 
         <div class="graph-section">
             <div class="graph-container">
-                <h3>Graphs</h3>
-                <div class="graph-box">Graph 1</div>
-                <div class="graph-box">Graph 2</div>
+                <h3>Game Statistics</h3>
+                <p>Possession</p>
+                <div class="graph-box">
+                    <canvas id="possessionChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        const team1Possession = {{ team1_possession | tojson
+                    }};
+                    const team2Possession = 100 - team1Possession;
+                    const team1 = "{{ game.Team1 }}";
+                    const team2 = "{{ game.Team2 }}";
+
+                    console.log(`Team 1 Possession: ${team1Possession}`);
+                    console.log(`Team 2 Possession: ${team2Possession}`);
+
+                    const ctx = document.getElementById('possessionChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: [`${team1} vs ${team2}`],
+                            datasets: [
+                                {
+                                    label: `${team1} Possession`,
+                                    data: [team1Possession],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                },
+                                {
+                                    label: `${team2} Possession`,
+                                    data: [team2Possession],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                },
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            indexAxis: 'y',
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `${context.dataset.label}: ${context.raw}%`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    max: 100, // Total possession is 100%
+                                    title: {
+                                        display: true,
+                                        text: 'Possession (%)'
+                                    }
+                                },
+                                y: {
+                                    stacked: true
+                                }
+                            }
+                        }
+                    });
+                    });
+                </script>
+                <p>Passes</p>
+                <div class="graph-box">
+                    <canvas id="PassesPieChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                    
+                    const successfulP = {{ successful_passes | tojson}};
+                    const failedP = {{ failed_passes | tojson }};
+
+                    const sfp = document.getElementById('PassesPieChart').getContext('2d');
+                    new Chart(sfp, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Successful Passes', 'Failed Passes'],
+                            datasets: [
+                                {
+                                    data: [successfulP, failedP],
+                                    backgroundColor: [
+                                        'rgba(54, 162, 235, 0.7)', // Color for successful passes
+                                        'rgba(255, 99, 132, 0.7)'  // Color for failed passes
+                                    ],
+                                    borderColor: [
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 99, 132, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            const total = successfulP + failedP;
+                                            const percentage = ((context.raw / total) * 100).toFixed(2);
+                                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            }
+                        }
+                    });
+                    });
+                </script>
                 <div class="graph-box">Graph 3</div>
                 <div class="graph-box">Graph 4</div>
                 <div class="graph-box">Graph 5</div>

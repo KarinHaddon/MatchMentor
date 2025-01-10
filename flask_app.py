@@ -4,6 +4,9 @@ import mysql.connector
 import hashlib
 import os
 import csv 
+import re
+import base64
+
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = "crabitat"
@@ -38,7 +41,21 @@ def register_submit_press():
     print(f"Username: {username}")
     print(f"Password: {password}")
 
+    username_pattern = r"^[a-zA-Z0-9]{5,15}$"
+    if not re.match(username_pattern, username):
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "Invalid username. Must be 5-15 alphanumeric characters."}), 400
+
+    # Password validation
+    password_pattern = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,20}$"
+    if not re.match(password_pattern, password):
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "Invalid password. Must be 8-20 characters, include one uppercase letter, one lowercase letter, and one digit."}), 400
+
     if username and password:
+        # Check if the username already exists
         select_query = "SELECT username FROM users"
         cursor.execute(select_query)
         results = cursor.fetchall()
@@ -48,17 +65,29 @@ def register_submit_press():
                 conn.close()
                 return jsonify({"error": "Username already taken"}), 400
 
-        hashed_password = hashing_algorithm(password)
-        print(f"Hashed Password: {hashed_password}")
+        # Generate a 32-byte salt
+        salt = os.urandom(32)
+        # Hash the password with the salt
+        salted_password = salt + password.encode('utf-8')
+        hashed_password = hashlib.sha256(salted_password).hexdigest()
+        # Encode the salt for storage (base64)
+        encoded_salt = base64.b64encode(salt).decode('utf-8')
 
+        print(f"Salt: {encoded_salt}")
+        print(f'Salted Password: {salted_password}')
+        print(f"Hashed Password: {hashed_password}")
+        
+
+        # Get the next userID
         select_query = "SELECT userID FROM users ORDER BY userID DESC LIMIT 1"
         cursor.execute(select_query)
         result = cursor.fetchone()
         last_user_id = result['userID'] if result else 0
         new_user_id = int(last_user_id) + 1
 
-        insert_query = "INSERT INTO users (userID, username, password) VALUES (%s, %s, %s)"
-        user_data = (new_user_id, username, hashed_password)
+        # Insert new user into the database
+        insert_query = "INSERT INTO users (userID, username, password, salt) VALUES (%s, %s, %s, %s)"
+        user_data = (new_user_id, username, hashed_password, encoded_salt)
         cursor.execute(insert_query, user_data)
         conn.commit()
 
@@ -72,35 +101,60 @@ def register_submit_press():
         conn.close()
         return jsonify({"error": "No data received"}), 400
 
+
 @app.route("/login_submitpress", methods=["POST"])
 def login_submit_press():
     conn = connect()
     cursor = conn.cursor(dictionary=True)
-    
+
     username = request.form.get('username')
     password = request.form.get('password')
-    print(f"Received data: Username: {username}, Password: {password}")
-    if username and password:
-        selectQ = "SELECT userID, username, password FROM users"
-        cursor.execute(selectQ)
-        results = cursor.fetchall()
-        for result in results:
-            if username == result['username'] and hashing_algorithm(password) == result['password']:
-                print("Login successful")
-                session['username'] = username
-                session['user_id'] = result['userID']
-                cursor.close()
-                conn.close()
-                return jsonify({"redirect": url_for('homepage')})
+    print(f"Username: {username}")
+    print(f"Password: {password}")
 
-        print("Login failed")
+
+    # Fetch the stored hashed password and salt for the given username
+    query = "SELECT userID, password, salt FROM users WHERE username = %s"
+    cursor.execute(query, (username,))
+    result = cursor.fetchone()
+
+    print(f"Result: {result}")
+
+    if not result:
+        # Username not found
         cursor.close()
         conn.close()
-        return jsonify({"error": "Username or password incorrect"}), 400
+        return jsonify({"error": "Invalid username or password"}), 400
+
+    # Extract the stored hashed password and salt
+    stored_hashed_password = result['password']
+    stored_salt = result['salt']
+
+    # Decode the stored salt from base64
+    decoded_salt = base64.b64decode(stored_salt)
+
+    # Hash the provided password with the stored salt
+    salted_password = decoded_salt + password.encode('utf-8')
+    hashed_password = hashlib.sha256(salted_password).hexdigest()
+
+    # Compare the provided password's hash with the stored hashed password
+    if hashed_password == stored_hashed_password:
+        # Login successful
+        print("Login successful")
+        session['username'] = username
+        print(f'username: {username}')
+        userID = result['userID']
+        print(f'userid: {userID}')
+        session['user_id'] = userID
+        cursor.close()
+        conn.close()
+
+        return jsonify({"redirect": url_for('homepage')})
     else:
+        # Invalid password
         cursor.close()
         conn.close()
-        return jsonify({"error": "Please enter both fields"}), 400
+        return jsonify({"error": "Invalid username or password"}), 400
     
 @app.route('/login')
 def login():
@@ -250,7 +304,7 @@ def upload_video():
         success, frame = video_capture.read()
         frame_filename = None
         if success:
-            frame_filename = "frame_0.png"
+            frame_filename = "frame_0.jpg"
             frame_path = os.path.join(images_folder, frame_filename)
             cv2.imwrite(frame_path, frame)
         video_capture.release()
@@ -273,11 +327,10 @@ def serve_frame():
     if not os.path.exists(frame_path):
         return 'Frame not found', 404
     
-    return send_file(frame_path, mimetype='image/png')
+    return send_file(frame_path, mimetype='image/jpeg')
 
 @app.route('/labelling', methods=['GET'])
 def labelling():
-    print("heyyyy")
     gameID = session.get('gameID')
     print("GamesID before: " + str(gameID))
     conn = connect()
@@ -286,7 +339,6 @@ def labelling():
     frame_filename = request.args.get('frame_filename')
     frame_number = int(request.args.get('frame_number', 0))
     video_path = request.args.get('video_path')
-    userID = session.get('user_id')
     
 
     if not gameID:
@@ -384,7 +436,7 @@ def next_frame():
     frame_filename = None
 
     if success:
-        frame_filename = f"frame_{frame_number}.png"
+        frame_filename = f"frame_{frame_number}.jpg"
         frame_path = os.path.join(images_folder, frame_filename)
         cv2.imwrite(frame_path, frame)
         frame_number += 10 
@@ -408,6 +460,26 @@ def stats(gameID):
     game = cursor.fetchone()
     print(game)  
 
+    possession_query = """
+    SELECT PossessionPercentage, SuccessfulPasses, FailedPasses
+    FROM individual_stats
+    WHERE GamesID = %s;
+    """
+    cursor.execute(possession_query, (gameID,))
+    possession_data = cursor.fetchall()
+    team1_possession = possession_data[0]['PossessionPercentage']
+    successful_passes = possession_data[0]['SuccessfulPasses']
+    failed_passes = possession_data[0]['FailedPasses']
+    print(f'Successful Passes: {successful_passes}')
+    print(f'Failed Passes: {failed_passes}')
+    print(f'possession_data: {team1_possession }')
+
+    context = {
+    'team1_possession': team1_possession,
+    'successful_passes': successful_passes,
+    'failed_passes': failed_passes
+    }
+
     cursor.close()
     conn.close()
 
@@ -427,7 +499,7 @@ def stats(gameID):
             print("No video path available for this game.")
             video_path = None  
         
-        return render_template('stats.html', game=game, video_path=video_path)
+        return render_template('stats.html', game=game, video_path=video_path, **context)
     else:
         return "Game not found", 404
 
