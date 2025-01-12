@@ -460,24 +460,38 @@ def stats(gameID):
     game = cursor.fetchone()
     print(game)  
 
-    possession_query = """
-    SELECT PossessionPercentage, SuccessfulPasses, FailedPasses
+    rangeID = 0
+
+    stats_query = """
+    SELECT PossessionPercentage, SuccessfulPasses, FailedPasses, GoalsScored, PassSuccessRate, TimePerPossession, TotalInPlayTime, TotalPossessionTime 
     FROM individual_stats
-    WHERE GamesID = %s;
+    WHERE GamesID = %s AND RangeID = %s;
     """
-    cursor.execute(possession_query, (gameID,))
-    possession_data = cursor.fetchall()
-    team1_possession = possession_data[0]['PossessionPercentage']
-    successful_passes = possession_data[0]['SuccessfulPasses']
-    failed_passes = possession_data[0]['FailedPasses']
+    cursor.execute(stats_query, (gameID, rangeID))
+    statGame_data = cursor.fetchall()
+    team1_possession = statGame_data[0]['PossessionPercentage']
+    successful_passes = statGame_data[0]['SuccessfulPasses']
+    failed_passes = statGame_data[0]['FailedPasses']
+    goals = statGame_data[0]['GoalsScored']
+    pass_success_rate = statGame_data[0]['PassSuccessRate']
+    time_per_possession = statGame_data[0]['TimePerPossession']
+    total_inPlay_time = statGame_data[0]['TotalInPlayTime']
+    total_Possession_time = statGame_data[0]['TotalPossessionTime']
+
     print(f'Successful Passes: {successful_passes}')
     print(f'Failed Passes: {failed_passes}')
     print(f'possession_data: {team1_possession }')
+    print(f'Goals scored: {goals}')
 
     context = {
     'team1_possession': team1_possession,
     'successful_passes': successful_passes,
-    'failed_passes': failed_passes
+    'failed_passes': failed_passes,
+    'goals': goals,
+    'pass_success_rate': pass_success_rate,
+    'time_per_possession': time_per_possession,
+    'total_inPlay_time': total_inPlay_time,
+    'total_Possession_time': total_Possession_time
     }
 
     cursor.close()

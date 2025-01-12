@@ -112,8 +112,9 @@
                 </div>
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
-                    
-                    const successfulP = {{ successful_passes | tojson}};
+
+                        const successfulP = {{ successful_passes | tojson
+                    }};
                     const failedP = {{ failed_passes | tojson }};
 
                     const sfp = document.getElementById('PassesPieChart').getContext('2d');
@@ -157,12 +158,101 @@
                     });
                     });
                 </script>
-                <div class="graph-box">Graph 3</div>
-                <div class="graph-box">Graph 4</div>
-                <div class="graph-box">Graph 5</div>
+                <p>Goals</p>
+                <div class="graph-box" id="singleDataDisplayBox">
+                    <h1 id="goalsDisplay"></h1>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        const goalsScored = {{ goals | tojson
+                    }};
+
+                    const goalsDisplayElement = document.getElementById('goalsDisplay');
+                    goalsDisplayElement.textContent = goalsScored;
+
+                    // Optionally, add animations or styles dynamically
+                    goalsDisplayElement.style.color = '#36A2EB'; // Blue color for text
+                    goalsDisplayElement.style.fontSize = '4rem'; // Large font size
+                    goalsDisplayElement.style.fontWeight = 'bold'; // Bold text
+                    });
+                </script>
+                <p>Possession Efficiency</p>
+                <div class="graph-box">
+                    <canvas id="possessionEfficiencyChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const passSuccessRate = {{ pass_success_rate | tojson }};
+                        const possessionPercent = {{ team1_possession | tojson }};
+
+                    const pec = document.getElementById('possessionEfficiencyChart').getContext('2d');
+                    new Chart(pec, {
+                        type: 'bar',
+                        data: {
+                            labels: [`${passSuccessRate} vs ${possessionPercent}`],
+                            datasets: [
+                                {
+                                    label: `Pass SuccessRate`,
+                                    data: [passSuccessRate],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                },
+                                {
+                                    label: `Possession Percentage`,
+                                    data: [possessionPercent],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                },
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            indexAxis: 'y',
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `${context.dataset.label}: ${context.raw}%`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    max: possessionPercent + passSuccessRate, 
+                                    title: {
+                                        display: true,
+                                        text: 'Possession Efficiency'
+                                    }
+                                },
+                                y: {
+                                    stacked: true
+                                }
+                            }
+                        }
+                    });
+                    });
+                </script>
+                <p>Average Possession Time (seconds)</p>
+                <div class="graph-box" id="singleDataDisplayBox">
+                    <h1 id="possessionAverageDisplay"></h1>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        const averagePossession = {{ time_per_possession | tojson}};
+
+                    const averagePossessionDisplayElement = document.getElementById('possessionAverageDisplay');
+                    averagePossessionDisplayElement.textContent = averagePossession;
+
+                    
+                    averagePossessionDisplayElement.style.color = '#36A2EB';
+                    averagePossessionDisplayElement.style.fontSize = '4rem';
+                    averagePossessionDisplayElement.style.fontWeight = 'bold'; 
+                    });
+                </script>
             </div>
         </div>
-    </div>
 </body>
 
 </html>

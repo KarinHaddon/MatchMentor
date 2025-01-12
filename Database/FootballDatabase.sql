@@ -32,7 +32,8 @@ FOREIGN KEY (GamesID) REFERENCES games(GamesID)
 
 CREATE TABLE individual_stats (
     GamesID INT,               
-    userID INT,                
+    userID INT,     
+    RangeID INT,
     TotalPossessionTime FLOAT,  
     TotalInPlayTime FLOAT,      
     TotalPasses INT,            
@@ -42,7 +43,7 @@ CREATE TABLE individual_stats (
     GoalsScored INT,            
     PossessionPercentage FLOAT, 
     TimePerPossession FLOAT,
-    PRIMARY KEY (userID, GamesID),
+    PRIMARY KEY (userID, GamesID, RangeID),
     FOREIGN KEY (GamesID) REFERENCES games(GamesID)
 );
 
