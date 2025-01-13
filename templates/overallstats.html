@@ -21,13 +21,51 @@
     <div class="title-heading">
         <h1>{{ username }}'s Overall Stats</h1>
     </div>
-    <div class="container"></div>
-        <div class="description-box">
+    <div class="container">
+        
+        <div class="description-box" id="singleDataDisplayBox">
+            <div class="graph-container">
+                <canvas id="graph1"></canvas>
+            </div>
+            <h1 id="gamesCountDisplay"></h1>
+            <p>Team 1 - Graph 1</p>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
 
+                const gameTotalNumber = {{ gameNumber | tojson }};
+
+            const gamesDisplayElement = document.getElementById('gamesCountDisplay');
+            gamesDisplayElement.textContent = gameTotalNumber;
+
+            // Optionally, add animations or styles dynamically
+            gamesDisplayElement.style.color = '#36A2EB'; // Blue color for text
+            gamesDisplayElement.style.fontSize = '4rem'; // Large font size
+            gamesDisplayElement.style.fontWeight = 'bold'; // Bold text
+            });
+        </script>
+        <div class="description-box">
+            <p>Team 1 - Graph 2</p>
+        </div>
+        <div class="description-box">
+            <p>Team 2 - Graph 1</p>
+        </div>
+        <div class="description-box">
+            <p>Team 2 - Graph 2</p>
+        </div>
+        <div class="description-box">
+            <p>Team 3 - Graph 1</p>
+        </div>
+        <div class="description-box">
+            <p>Team 3 - Graph 2</p>
+        </div>
+        <div class="description-box">
+            <p>Team 4 - Graph 1</p>
+        </div>
+        <div class="description-box">
+            <p>Team 4 - Graph 2</p>
         </div>
     </div>
-
-
 </body>
 
 </html>

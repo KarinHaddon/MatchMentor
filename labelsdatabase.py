@@ -11,7 +11,7 @@ conn = mysql.connector.connect(
 print("Connection successful!")
 
 games_id = 63
-csv_path = r"C:\Users\karin\MatchMentor\static\TestLabelsCSV.csv"
+csv_path = r"C:\Users\karin\MatchMentor\static\TestLabelsFullCSV.csv"
 # Step 1: Load the CSV file (skip the header row while reading)
 df = pd.read_csv(csv_path, skiprows=1, names=["Frame", "Possession", "Passing", "InPlay", "Goal"])
     
@@ -20,10 +20,20 @@ for col in ["Possession", "Passing", "InPlay", "Goal"]:
     df[col] = df[col].apply(lambda x: 1 if x > 0.5 else 0)
     
 insert_query = """
-    INSERT INTO labelStats (GamesID, Frame, Posession, InPlay, Passing, Goal)
-    VALUES (%s, %s, %s, %s, %s, %s)
-    """
-    
+    INSERT INTO labelStats (
+        GamesID, 
+        Frame, 
+        Posession, 
+        InPlay, 
+        Passing, 
+        Goal
+    ) VALUES (%s, %s, %s, %s, %s, %s)
+    ON DUPLICATE KEY UPDATE
+        Posession = VALUES(Posession),
+        InPlay = VALUES(InPlay),
+        Passing = VALUES(Passing),
+        Goal = VALUES(Goal);
+""" 
 # Step 4: Insert each row into the database
 cursor = conn.cursor()
 for _, row in df.iterrows():

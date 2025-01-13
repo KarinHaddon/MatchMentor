@@ -50,14 +50,13 @@
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
 
-                        const team1Possession = {{ team1_possession | tojson
-                    }};
-                    const team2Possession = 100 - team1Possession;
-                    const team1 = "{{ game.Team1 }}";
-                    const team2 = "{{ game.Team2 }}";
+                        const team1Possession = {{ team1_possession0 | tojson }};
+                        const team2Possession = 100 - team1Possession;
+                        const team1 = "{{ game.Team1 }}";
+                        const team2 = "{{ game.Team2 }}";
 
-                    console.log(`Team 1 Possession: ${team1Possession}`);
-                    console.log(`Team 2 Possession: ${team2Possession}`);
+                        console.log(`Team 1 Possession: ${team1Possession}`);
+                        console.log(`Team 2 Possession: ${team2Possession}`);
 
                     const ctx = document.getElementById('possessionChart').getContext('2d');
                     new Chart(ctx, {
@@ -75,6 +74,7 @@
                                     data: [team2Possession],
                                     backgroundColor: 'rgba(255, 99, 132, 0.7)',
                                 },
+                                
                             ]
                         },
                         options: {
@@ -94,8 +94,7 @@
                                     stacked: true,
                                     max: 100, // Total possession is 100%
                                     title: {
-                                        display: true,
-                                        text: 'Possession (%)'
+                                        display: false
                                     }
                                 },
                                 y: {
@@ -113,9 +112,8 @@
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
 
-                        const successfulP = {{ successful_passes | tojson
-                    }};
-                    const failedP = {{ failed_passes | tojson }};
+                        const successfulP = {{ successful_passes0 | tojson}};
+                        const failedP = {{ failed_passes0 | tojson }};
 
                     const sfp = document.getElementById('PassesPieChart').getContext('2d');
                     new Chart(sfp, {
@@ -165,8 +163,7 @@
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
 
-                        const goalsScored = {{ goals | tojson
-                    }};
+                        const goalsScored = {{ goals0 | tojson }};
 
                     const goalsDisplayElement = document.getElementById('goalsDisplay');
                     goalsDisplayElement.textContent = goalsScored;
@@ -183,8 +180,8 @@
                 </div>
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
-                        const passSuccessRate = {{ pass_success_rate | tojson }};
-                        const possessionPercent = {{ team1_possession | tojson }};
+                        const passSuccessRate = {{ pass_success_rate0 | tojson }};
+                        const possessionPercent = {{ team1_possession0 | tojson }};
 
                     const pec = document.getElementById('possessionEfficiencyChart').getContext('2d');
                     new Chart(pec, {
@@ -219,10 +216,9 @@
                             scales: {
                                 x: {
                                     stacked: true,
-                                    max: possessionPercent + passSuccessRate, 
+                                    max: possessionPercent + passSuccessRate,
                                     title: {
-                                        display: true,
-                                        text: 'Possession Efficiency'
+                                        display: false
                                     }
                                 },
                                 y: {
@@ -240,17 +236,471 @@
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
 
-                        const averagePossession = {{ time_per_possession | tojson}};
+                        const averagePossession = {{ time_per_possession0 | tojson }};
 
                     const averagePossessionDisplayElement = document.getElementById('possessionAverageDisplay');
                     averagePossessionDisplayElement.textContent = averagePossession;
 
-                    
+
                     averagePossessionDisplayElement.style.color = '#36A2EB';
                     averagePossessionDisplayElement.style.fontSize = '4rem';
                     averagePossessionDisplayElement.style.fontWeight = 'bold'; 
                     });
                 </script>
+                <p>Number of Passes</p>
+                <div class="graph-box" id="singleDataDisplayBox">
+                    <h1 id="numberPassDisplay"></h1>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        const averagePossession = {{ total_passes0 | tojson}};
+
+                    const averagePossessionDisplayElement = document.getElementById('numberPassDisplay');
+                    averagePossessionDisplayElement.textContent = averagePossession;
+
+
+                    averagePossessionDisplayElement.style.color = '#36A2EB';
+                    averagePossessionDisplayElement.style.fontSize = '4rem';
+                    averagePossessionDisplayElement.style.fontWeight = 'bold'; 
+                    });
+                </script>
+                <p>Total Possession Time (seconds)</p>
+                <div class="graph-box" id="singleDataDisplayBox">
+                    <h1 id="PossessionTimeDisplay"></h1>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+
+                        const averagePossession = {{ total_Possession_time0 | tojson }};
+
+                    const averagePossessionDisplayElement = document.getElementById('PossessionTimeDisplay');
+                    averagePossessionDisplayElement.textContent = averagePossession;
+
+
+                    averagePossessionDisplayElement.style.color = '#36A2EB';
+                    averagePossessionDisplayElement.style.fontSize = '4rem';
+                    averagePossessionDisplayElement.style.fontWeight = 'bold'; 
+                    });
+                </script>
+                <p>Total Possession Time Per Quartiles</p>
+                <div class="graph-box">
+                    <canvas id="possessionTimeQChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Assuming these variables are passed from the server-side
+                        const possessionTime25 = {{ total_Possession_time25 | tojson }};
+                        const possessionTime50 = {{ total_Possession_time50 | tojson }};
+                        const possessionTime75 = {{ total_Possession_time75 | tojson }};
+                        const possessionTime100 = {{ total_Possession_time100 | tojson }};
+
+                    const pqc = document.getElementById('possessionTimeQChart').getContext('2d');
+                    new Chart(pqc, {
+                        type: 'bar',
+                        data: {
+                            // Add labels for each quartile
+                            labels: ['1st 25%', '2nd 25%', '3rd 25%', '4th 25%'],
+                            datasets: [
+                                {
+                                    label: 'Possession Time',
+                                    data: [possessionTime25, possessionTime50, possessionTime75, possessionTime100], // Add data points for each bar
+                                    backgroundColor: [
+                                        'rgba(54, 162, 235, 0.7)',
+                                        'rgba(255, 99, 132, 0.7)',
+                                        'rgba(75, 192, 192, 0.7)',
+                                        'rgba(153, 102, 255, 0.7)'
+                                    ], // Add a unique color for each bar
+                                },
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `${context.dataset.label}: ${context.raw} seconds`; // Adjust units as needed
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    display: false 
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Quartile',
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Time (seconds)',
+                                    },
+                                    beginAtZero: true // Ensure y-axis starts at zero
+                                }
+                            }
+                        }
+                    });
+                    });
+                </script>
+                <p>Passes Per Quartile</p>
+                <div class="graph-box">
+                    <canvas id="passesQuartileChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Assuming these variables are passed from the server-side
+                        const successfulPasses = [
+                            {{ successful_passes25 | tojson }},
+                            {{ successful_passes50 | tojson }},
+                            {{ successful_passes75 | tojson }},
+                            {{ successful_passes100 | tojson }},
+                        ];
+                
+                        const failedPasses = [
+                            {{ failed_passes25 | tojson }},
+                            {{ failed_passes50 | tojson }},
+                            {{ failed_passes75 | tojson }},
+                            {{ failed_passes100 | tojson }},
+                        ];
+                
+                        const sqc = document.getElementById('passesQuartileChart').getContext('2d');
+                        new Chart(sqc, {
+                            type: 'bar',
+                            data: {
+                                labels: ['1st 25%', '2nd 25%', '3rd 25%', '4th 25%'], // Labels for quartiles
+                                datasets: [
+                                    {
+                                        label: 'Successful Passes',
+                                        data: successfulPasses, // Successful passes for each quartile
+                                        backgroundColor: 'rgba(54, 162, 235, 0.7)', // Color for successful passes
+                                    },
+                                    {
+                                        label: 'Failed Passes',
+                                        data: failedPasses, // Failed passes for each quartile
+                                        backgroundColor: 'rgba(255, 99, 132, 0.7)', // Color for failed passes
+                                    },
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `${context.dataset.label}: ${context.raw} passes`; // Adjust tooltip to show data
+                                            }
+                                        }
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'top', // Position of the legend
+                                    },
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Quartile',
+                                        },
+                                        stacked: true, // Stacks bars on the x-axis
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Passes',
+                                        },
+                                        beginAtZero: true, // Ensure y-axis starts at zero
+                                        stacked: true, // Stacks bars on the y-axis
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+                <p>Pass Success Rate per Quartile</p>
+                <div class="graph-box">
+                    <canvas id="passesRateQuartileChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Assuming these variables are passed from the server-side
+                        const passSuccessRates = [
+                            {{ pass_success_rate25 | tojson }},
+                            {{ pass_success_rate50 | tojson }},
+                            {{ pass_success_rate75 | tojson }},
+                            {{ pass_success_rate100 | tojson }},
+                        ];
+                
+                        const lqc = document.getElementById('passesRateQuartileChart').getContext('2d');
+                        new Chart(lqc, {
+                            type: 'line',
+                            data: {
+                                labels: ['1st 25%', '2nd 25%', '3rd 25%', '4th 25%'], // Labels for quartiles
+                                datasets: [
+                                    {
+                                        label: 'Pass Success Rate (%)',
+                                        data: passSuccessRates, // Pass success rates for each quartile
+                                        borderColor: 'rgba(255, 99, 132, 0.7)', // Line color
+                                        backgroundColor: 'rgba(54, 162, 235, 0.2)', // Fill under the line
+                                        borderWidth: 2, // Thickness of the line
+                                        pointBackgroundColor: 'rgba(54, 162, 235, 1)', // Color for data points
+                                        pointBorderColor: '#fff', // Border color for data points
+                                        pointHoverBackgroundColor: '#fff', // Hover effect color
+                                        pointHoverBorderColor: 'rgba(54, 162, 235, 1)', // Border color on hover
+                                        tension: 0.4, // Curve smoothing for the line
+                                        fill: true, // Fill the area under the line
+                                    },
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `${context.dataset.label}: ${context.raw}%`; // Adjust tooltip to show percentage
+                                            }
+                                        }
+                                    },
+                                    legend: {
+                                        display: false
+                                    },
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Quartile',
+                                        },
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Pass Success Rate (%)',
+                                        },
+                                        beginAtZero: true, // Ensure y-axis starts at zero
+                                        max: 100, // Maximum value for pass success rate
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+                <p>Goals Per Quartiles</p>
+                <div class="graph-box">
+                    <canvas id="GoalsQChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Assuming these variables are passed from the server-side
+                        const Goals25 = {{ goals25 | tojson }};
+                        const Goals50 = {{ goals50 | tojson }};
+                        const Goals75 = {{ goals75 | tojson }};
+                        const Goals100 = {{ goals100 | tojson }};
+
+                    const gqc = document.getElementById('GoalsQChart').getContext('2d');
+                    new Chart(gqc, {
+                        type: 'bar',
+                        data: {
+                            // Add labels for each quartile
+                            labels: ['1st 25%', '2nd 25%', '3rd 25%', '4th 25%'],
+                            datasets: [
+                                {
+                                    data: [Goals25, Goals50, Goals75, Goals100], // Add data points for each bar
+                                    backgroundColor: [
+                                        'rgba(54, 162, 235, 0.7)',
+                                        'rgba(255, 99, 132, 0.7)',
+                                        'rgba(75, 192, 192, 0.7)',
+                                        'rgba(153, 102, 255, 0.7)'
+                                    ], // Add a unique color for each bar
+                                    label: '', // Ensure that the dataset has no label
+                                },
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `${context.raw} goals`; // Adjust units as needed
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    display: false // This disables the legend at the top
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Quartile',
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Goals',
+                                    },
+                                    beginAtZero: true, // Ensure y-axis starts at zero
+                                    ticks: {
+                                        stepSize: 1, // Set the step size to 1 to only show whole numbers
+                                        callback: function(value) {
+                                            return Number.isInteger(value) ? value : ''; // Show only whole numbers
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    });
+                </script>
+                <p>Possession Percentage per Quartile</p>
+                <div class="graph-box">
+                    <canvas id="possessionPercentQuartileChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const possessionPercentRates = [
+                            {{ team1_possession25 | tojson }},
+                            {{ team1_possession50 | tojson }},
+                            {{ team1_possession75 | tojson }},
+                            {{ team1_possession100 | tojson }},
+                        ];
+                
+                        const ppc = document.getElementById('possessionPercentQuartileChart').getContext('2d');
+                        new Chart(ppc, {
+                            type: 'line',
+                            data: {
+                                labels: ['1st 25%', '2nd 25%', '3rd 25%', '4th 25%'], // Labels for quartiles
+                                datasets: [
+                                    {
+                                        label: 'Pass Success Rate (%)',
+                                        data: possessionPercentRates, // Pass success rates for each quartile
+                                        borderColor: 'rgba(255, 99, 132, 0.7)', // Line color
+                                        backgroundColor: 'rgba(54, 162, 235, 0.2)', // Fill under the line
+                                        borderWidth: 2, // Thickness of the line
+                                        pointBackgroundColor: 'rgba(54, 162, 235, 1)', // Color for data points
+                                        pointBorderColor: '#fff', // Border color for data points
+                                        pointHoverBackgroundColor: '#fff', // Hover effect color
+                                        pointHoverBorderColor: 'rgba(54, 162, 235, 1)', // Border color on hover
+                                        tension: 0.4, // Curve smoothing for the line
+                                        fill: true, // Fill the area under the line
+                                    },
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `${context.dataset.label}: ${context.raw}%`; // Adjust tooltip to show percentage
+                                            }
+                                        }
+                                    },
+                                    legend: {
+                                        display: false
+                                    },
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Quartile',
+                                        },
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Possession Percentage (%)',
+                                        },
+                                        beginAtZero: true, // Ensure y-axis starts at zero
+                                        max: 100, // Maximum value for pass success rate
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+                <p>Average Possession Time Per Quartiles</p>
+                <div class="graph-box">
+                    <canvas id="PosessionTimeQChart"></canvas>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const AveragePTime25 = {{ time_per_possession25 | tojson }};
+                        const AveragePTime50 = {{ time_per_possession50 | tojson }};
+                        const AveragePTime75 = {{ time_per_possession75 | tojson }};
+                        const AveragePTime100 = {{ time_per_possession100 | tojson }};
+
+                    const gqc = document.getElementById('PosessionTimeQChart').getContext('2d');
+                    new Chart(gqc, {
+                        type: 'bar',
+                        data: {
+                            // Add labels for each quartile
+                            labels: ['1st 25%', '2nd 25%', '3rd 25%', '4th 25%'],
+                            datasets: [
+                                {
+                                    data: [AveragePTime25, AveragePTime50, AveragePTime75, AveragePTime100], // Add data points for each bar
+                                    backgroundColor: [
+                                        'rgba(54, 162, 235, 0.7)',
+                                        'rgba(255, 99, 132, 0.7)',
+                                        'rgba(75, 192, 192, 0.7)',
+                                        'rgba(153, 102, 255, 0.7)'
+                                    ], // Add a unique color for each bar
+                                    label: '', // Ensure that the dataset has no label
+                                },
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `${context.raw} seconds`; // Adjust units as needed
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    display: false // This disables the legend at the top
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Quartile',
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'seconds',
+                                    },
+                                    beginAtZero: true, // Ensure y-axis starts at zero
+                                    ticks: {
+                                        stepSize: 1, // Set the step size to 1 to only show whole numbers
+                                        callback: function(value) {
+                                            return Number.isInteger(value) ? value : ''; // Show only whole numbers
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    });
+                </script>
+                
+
+
             </div>
         </div>
 </body>

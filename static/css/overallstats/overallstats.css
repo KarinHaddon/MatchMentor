@@ -106,10 +106,12 @@ body {
     flex: 1;
     border-radius: 10px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* Two boxes per row */
     gap: 20px;
     z-index: 4;
     position: relative;
+    overflow-y: auto; /* Enable scrolling */
+    max-height: 600px; /* Adjust the height based on your needs */
 }
 
 .description-box {
@@ -119,4 +121,38 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s;
     text-align: left;
+    height: 350px; /* Box height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.graph-container {
+    flex: 1; /* Ensures the graph container grows to fill available space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Required for canvas scaling */
+    height: 80%; /* Takes most of the box's height */
+}
+
+canvas {
+    max-width: 100%; /* Ensures the canvas doesn't exceed its container */
+    max-height: 100%; /* Ensures the canvas doesn't exceed its container */
+}
+
+#gamesCountDisplay {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin-bottom: 10px; /* Provides space between the count and the graph */
+}
+
+#singleDataDisplayBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px; /* Adjust height as needed */
+    background-color: rgba(54, 162, 235, 0.1); /* Light blue background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }

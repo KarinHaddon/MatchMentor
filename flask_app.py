@@ -460,42 +460,49 @@ def stats(gameID):
     game = cursor.fetchone()
     print(game)  
 
-    rangeID = 0
+    # Define all RangeIDs you want to fetch
+    range_ids = [0, 1, 2, 3, 4]
 
+    # Query template
     stats_query = """
-    SELECT PossessionPercentage, SuccessfulPasses, FailedPasses, GoalsScored, PassSuccessRate, TimePerPossession, TotalInPlayTime, TotalPossessionTime 
+    SELECT TotalPossessionTime, TotalPasses, SuccessfulPasses, FailedPasses, PassSuccessRate, PossessionPercentage, GoalsScored, TimePerPossession
     FROM individual_stats
     WHERE GamesID = %s AND RangeID = %s;
     """
-    cursor.execute(stats_query, (gameID, rangeID))
-    statGame_data = cursor.fetchall()
-    team1_possession = statGame_data[0]['PossessionPercentage']
-    successful_passes = statGame_data[0]['SuccessfulPasses']
-    failed_passes = statGame_data[0]['FailedPasses']
-    goals = statGame_data[0]['GoalsScored']
-    pass_success_rate = statGame_data[0]['PassSuccessRate']
-    time_per_possession = statGame_data[0]['TimePerPossession']
-    total_inPlay_time = statGame_data[0]['TotalInPlayTime']
-    total_Possession_time = statGame_data[0]['TotalPossessionTime']
 
-    print(f'Successful Passes: {successful_passes}')
-    print(f'Failed Passes: {failed_passes}')
-    print(f'possession_data: {team1_possession }')
-    print(f'Goals scored: {goals}')
+    # Dictionary to hold all data
+    context = {}
 
-    context = {
-    'team1_possession': team1_possession,
-    'successful_passes': successful_passes,
-    'failed_passes': failed_passes,
-    'goals': goals,
-    'pass_success_rate': pass_success_rate,
-    'time_per_possession': time_per_possession,
-    'total_inPlay_time': total_inPlay_time,
-    'total_Possession_time': total_Possession_time
-    }
+    # Open database connection and cursor
+    conn = connect()
+    cursor = conn.cursor(dictionary=True)
 
+    # Loop through each RangeID and fetch data
+    for range_id in range_ids:
+        cursor.execute(stats_query, (gameID, range_id))
+        stats_data = cursor.fetchone()  # Fetch a single record for the given RangeID
+
+        # Add data to context using a dynamic key pattern
+        context[f'team1_possession{range_id * 25}'] = stats_data['PossessionPercentage']
+        context[f'successful_passes{range_id * 25}'] = stats_data['SuccessfulPasses']
+        context[f'failed_passes{range_id * 25}'] = stats_data['FailedPasses']
+        context[f'goals{range_id * 25}'] = stats_data['GoalsScored']
+        context[f'pass_success_rate{range_id * 25}'] = stats_data['PassSuccessRate']
+        context[f'time_per_possession{range_id * 25}'] = stats_data['TimePerPossession']
+        context[f'total_Possession_time{range_id * 25}'] = stats_data['TotalPossessionTime']
+        context[f'total_passes{range_id * 25}'] = stats_data['TotalPasses']
+
+
+    
+    # Close database connection
     cursor.close()
     conn.close()
+
+    # Example output for debugging
+    for key, value in context.items():
+        print(f'{key}: {value}')
+
+
 
     if game:
         video_path = game.get('videoPath', None)
@@ -522,6 +529,32 @@ def show_frame(frame_path):
     print(frame_path)
 
     return 
+
+@app.route('/overallstats')
+def overallstats():
+    conn = connect()
+    cursor = conn.cursor(dictionary=True)
+    userID = session.get('user_id')
+    username = session.get('username', 'Guest')
+    capital_username = username.capitalize()
+
+    stats_query = """
+    SELECT TotalGamesPlayed
+    FROM overall_stats
+    WHERE userID = %s;
+    """
+    cursor.execute(stats_query, (userID,))
+    result = cursor.fetchone()
+    gameNumber = result['TotalGamesPlayed']
+
+    context = {
+    'gameNumber': gameNumber
+    }
+
+    cursor.close()
+    conn.close()
+
+    return render_template('overallstats.html', username=capital_username, **context)
 
 
 

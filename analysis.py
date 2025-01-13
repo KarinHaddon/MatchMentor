@@ -94,7 +94,7 @@ def calculate_goals(gameID, frame_range):
     """
     if frame_range:
         goal_query += " AND Frame BETWEEN %s AND %s"
-        goal_query += " ORDER BY Frame"  # Ensure ORDER BY comes last
+        goal_query += " ORDER BY Frame"  
         cursor.execute(goal_query, (gameID, *frame_range))
     else:
         goal_query += " ORDER BY Frame"
@@ -140,11 +140,11 @@ def calculate_passSequences(gameID, frame_range):
 
     for passing  in passes:
         if passing  == 1:
-            if not in_sequence:  # Start of a new sequence
+            if not in_sequence:  
                     pass_sequence += 1
                     in_sequence = True
         else:
-                in_sequence = False  # End of the current sequence
+                in_sequence = False  
 
     cursor.close()
     conn.close()
@@ -247,17 +247,17 @@ def calculate_possessionSequenceLength(gameID, frame_range):
 
     for pos in teampossessions:
         if pos  == 1:
-            if not in_sequence:  # Start of a new sequence
+            if not in_sequence:  
                     possession_sequence += 1
                     in_sequence = True
         else:
-                in_sequence = False  # End of the current sequence
+                in_sequence = False  
 
     for pos in teampossessions:
-        if pos == 1:  # In possession
+        if pos == 1: 
             current_length += 1
         else:
-            if current_length > 0:  # End of a sequence
+            if current_length > 0:  
                 possession_lengths.append(current_length)
                 current_length = 0
 
