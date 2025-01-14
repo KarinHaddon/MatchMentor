@@ -539,16 +539,82 @@ def overallstats():
     capital_username = username.capitalize()
 
     stats_query = """
-    SELECT TotalGamesPlayed
+    SELECT TotalGamesPlayed, AvgPossessionPercentage, SuccessfulPasses, FailedPasses, TotalPasses, TotalGoalsScored, GoalsPerGame, TotalInPlayTime
     FROM overall_stats
     WHERE userID = %s;
     """
     cursor.execute(stats_query, (userID,))
-    result = cursor.fetchone()
-    gameNumber = result['TotalGamesPlayed']
+    result = cursor.fetchall()
+    gameNumber = result[0]['TotalGamesPlayed']
+    avgPossessionPercent = result[0]['AvgPossessionPercentage']
+    successPasses = result[0]['SuccessfulPasses']
+    failedPasses = result[0]['FailedPasses']
+    totalPasses = result[0]['TotalPasses']
+    totalGoals = result[0]['TotalGoalsScored']
+    goalsPerGame = result[0]['GoalsPerGame']
+    TotalInPlayTime = result[0]['TotalInPlayTime']
+
+    RangeID = 0
+
+    stats_query = """
+    SELECT 
+        individual_stats.GamesID,
+        games.Team2 AS OpponentName,
+        individual_stats.PossessionPercentage,
+        individual_stats.SuccessfulPasses,
+        individual_stats.FailedPasses,
+        individual_stats.GoalsScored,
+        individual_stats.PassSuccessRate,
+        individual_stats.TotalPossessionTime
+    FROM 
+        individual_stats
+    INNER JOIN 
+        Games ON individual_stats.GamesID = games.GamesID
+    WHERE 
+        individual_stats.userID = %s AND individual_stats.RangeID = %s;
+    """
+
+    cursor.execute(stats_query, (userID, RangeID,))
+    results = cursor.fetchall()
+    game_labels = []
+    opponent_names = []
+    possession_percentages = []
+    successful_passes = []
+    failed_passes = []
+    goalsScored = []
+    passSuccessRate = []
+    totalPossessionTime = []
+
+    for row in results:
+        game_labels.append(f"Game {row['GamesID']}")
+        opponent_names.append(row['OpponentName'])
+        possession_percentages.append(row['PossessionPercentage'])
+        successful_passes.append(row['SuccessfulPasses'])
+        failed_passes.append(row['FailedPasses'])
+        goalsScored.append(row['GoalsScored'])
+        passSuccessRate.append(row['PassSuccessRate'])
+        totalPossessionTime.append(row['TotalPossessionTime'])
+
+
 
     context = {
-    'gameNumber': gameNumber
+    'gameNumber': gameNumber,
+    'avgPossessionPercent': avgPossessionPercent,
+    'successPasses': successPasses,
+    'failedPasses': failedPasses,
+    'totalPasses': totalPasses,
+    'totalGoals': totalGoals,
+    'goalsPerGame': goalsPerGame,
+    'TotalInPlayTime': TotalInPlayTime,
+    
+    'game_labels': game_labels,
+    'opponent_names': opponent_names,
+    'possession_percentages': possession_percentages,
+    'successful_passes': successful_passes,
+    'failed_passes': failed_passes,
+    'goalsScored': goalsScored,
+    'passSuccessRate': passSuccessRate,
+    'totalPossessionTime': totalPossessionTime
     }
 
     cursor.close()

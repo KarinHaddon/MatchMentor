@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MatchMentor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter+Tight" type="text/css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/overallstats/overallstats.css') }}">
 </head>
@@ -22,19 +23,16 @@
         <h1>{{ username }}'s Overall Stats</h1>
     </div>
     <div class="container">
-        
-        <div class="description-box" id="singleDataDisplayBox">
-            <div class="graph-container">
-                <canvas id="graph1"></canvas>
+        <div class="description-box">
+            <p>Total Number of Games</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <h1 id="gamesCountDisplay"></h1>
             </div>
-            <h1 id="gamesCountDisplay"></h1>
-            <p>Team 1 - Graph 1</p>
         </div>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-
-                const gameTotalNumber = {{ gameNumber | tojson }};
-
+                const gameTotalNumber = {{ gameNumber | tojson
+            }};
             const gamesDisplayElement = document.getElementById('gamesCountDisplay');
             gamesDisplayElement.textContent = gameTotalNumber;
 
@@ -44,27 +42,465 @@
             gamesDisplayElement.style.fontWeight = 'bold'; // Bold text
             });
         </script>
+
         <div class="description-box">
-            <p>Team 1 - Graph 2</p>
+            <p>Average Possession Percentage</p>
+            <div class="graph-box">
+                <canvas id="possessionChart"></canvas>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const usersPossessionPercent = {{ avgPossessionPercent | tojson
+            }};
+            const oppPossessionPercent = 100 - usersPossessionPercent;
+
+            console.log(`Team 1 Possession: ${usersPossessionPercent}`);
+
+            const ctx = document.getElementById('possessionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [`Your Team vs Opponents`],
+                    datasets: [
+                        {
+                            label: `Your Possession`,
+                            data: [usersPossessionPercent],
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        },
+                        {
+                            label: `Opponents Possession`,
+                            data: [oppPossessionPercent],
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        },
+
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        },
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            max: 100, // Total possession is 100%
+                            title: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+            });
+        </script>
         <div class="description-box">
-            <p>Team 2 - Graph 1</p>
+            <p>Successful vs Failed Passes</p>
+            <div class="graph-box">
+                <canvas id="sfPassesPieChart"></canvas>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const successfulP = {{ successPasses | tojson
+            }};
+            const failedP = {{ failedPasses | tojson }};
+
+            const sfp = document.getElementById('sfPassesPieChart').getContext('2d');
+            new Chart(sfp, {
+                type: 'pie',
+                data: {
+                    labels: ['Successful Passes', 'Failed Passes'],
+                    datasets: [
+                        {
+                            data: [successfulP, failedP],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)', // Color for successful passes
+                                'rgba(255, 99, 132, 0.7)'  // Color for failed passes
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const total = successfulP + failedP;
+                                    const percentage = ((context.raw / total) * 100).toFixed(2);
+                                    return `${context.label}: ${context.raw} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+                    });
+        </script>
         <div class="description-box">
-            <p>Team 2 - Graph 2</p>
+            <p>Possession Percentage Across Games</p>
+            <div class="graph-box">
+                <canvas id="possessionPercentagesBar"></canvas>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('possessionPercentagesBar').getContext('2d');
+        
+                const opponentNames = {{ opponent_names | tojson }};
+                const possessionPercentages = {{ possession_percentages | tojson }};
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: opponentNames, // Use opponent names as labels
+                        datasets: [
+                            {
+                                label: 'Possession Percentage',
+                                data: possessionPercentages,
+                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw}%`;
+                                    },
+                                },
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Percentage',
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+        </script>
         <div class="description-box">
-            <p>Team 3 - Graph 1</p>
+            <p>Total Passes</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <h1 id="totalPassesDisplay"></h1>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const total_passes = {{ totalPasses | tojson }};
+                const gamesDisplayElement = document.getElementById('totalPassesDisplay');
+            
+                gamesDisplayElement.textContent = total_passes;
+
+            // Optionally, add animations or styles dynamically
+            gamesDisplayElement.style.color = '#36A2EB'; // Blue color for text
+            gamesDisplayElement.style.fontSize = '4rem'; // Large font size
+            gamesDisplayElement.style.fontWeight = 'bold'; // Bold text
+            });
+        </script>
         <div class="description-box">
-            <p>Team 3 - Graph 2</p>
+            <p>Total Goals Scored</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <h1 id="totalGoalsDisplay"></h1>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const total_goals = {{ totalGoals | tojson }};
+                const gamesDisplayElement = document.getElementById('totalGoalsDisplay');
+            
+                gamesDisplayElement.textContent = total_goals;
+
+            // Optionally, add animations or styles dynamically
+            gamesDisplayElement.style.color = '#36A2EB'; // Blue color for text
+            gamesDisplayElement.style.fontSize = '4rem'; // Large font size
+            gamesDisplayElement.style.fontWeight = 'bold'; // Bold text
+            });
+        </script>
         <div class="description-box">
-            <p>Team 4 - Graph 1</p>
+            <p>Goals Scored Across Games</p>
+            <div class="graph-box">
+                <canvas id="goalsRadarChart"></canvas>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const goals_Scored = {{ goalsScored | tojson }};  // Array of goals scored in each game
+                const opponentNames = {{ opponent_names | tojson }};  // Array of game labels (e.g., Game 1, Game 2, etc.)
+        
+                const ctx = document.getElementById('goalsRadarChart').getContext('2d');
+        
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: opponentNames,  // Labels for each axis (games)
+                        datasets: [{
+                            label: 'Goals Scored',
+                            data: goals_Scored,  // Values for each game (goals scored)
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',  // Light blue background
+                            borderColor: 'rgba(54, 162, 235, 1)',  // Dark blue border
+                            borderWidth: 1,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            r: {
+                                beginAtZero: true,  // Start scale at 0
+                                max: Math.max(...goals_Scored) + 1,  // Automatically adjust max value based on the data
+                                ticks: {
+                                    stepSize: 1,  // Adjust steps for the radar chart
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+        </script>
         <div class="description-box">
-            <p>Team 4 - Graph 2</p>
+            <p>Pass Success Rate per Game</p>
+            <div class="graph-box">
+                <canvas id="passSuccessRateDisplay"></canvas>
+            </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('passSuccessRateDisplay').getContext('2d');
+        
+                const opponentNames = {{ opponent_names | tojson }};
+                const pass_SuccessRate = {{ passSuccessRate | tojson }};
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: opponentNames, // Use opponent names as labels
+                        datasets: [
+                            {
+                                label: 'Possession Percentage',
+                                data: pass_SuccessRate,
+                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw}%`;
+                                    },
+                                },
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Percentage',
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+        </script>
+        <div class="description-box">
+            <p>Possession Efficiency</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <canvas id="possessionEfficiencyChart"></canvas>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const passSRate = {{ passSuccessRate | tojson }};
+                const possPercent = {{ possession_percentages | tojson }};
+                const opponent_Names = {{ opponent_names | tojson }};
+
+            const pec = document.getElementById('possessionEfficiencyChart').getContext('2d');
+            new Chart(pec, {
+                type: 'bar',
+                data: {
+                    labels: opponent_Names,
+                    datasets: [
+                        {
+                            label: `Pass Success Rate`,
+                            data: passSRate,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        },
+                        {
+                            label: `Possession Percentage`,
+                            data: possPercent,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            max: possPercent + passSRate,
+                            title: {
+                                display: false
+                            },
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+            });
+        </script>
+        <div class="description-box">
+            <p>Average Goals per Game</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <h1 id="avgGoalsDisplay"></h1>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const avgGoals = {{ goalsPerGame | tojson }};
+                const gamesDisplayElement = document.getElementById('avgGoalsDisplay');
+            
+                gamesDisplayElement.textContent = avgGoals;
+
+            // Optionally, add animations or styles dynamically
+            gamesDisplayElement.style.color = '#36A2EB'; // Blue color for text
+            gamesDisplayElement.style.fontSize = '4rem'; // Large font size
+            gamesDisplayElement.style.fontWeight = 'bold'; // Bold text
+            });
+        </script>
+        <div class="description-box">
+            <p>Total Possession Time</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <canvas id="totalPossessionChart"></canvas>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const opponents = {{ opponent_names | tojson }};
+                const total_possTime = {{ totalPossessionTime | tojson }}; 
+
+                const ppc = document.getElementById('totalPossessionChart').getContext('2d');
+                new Chart(ppc, {
+                    type: 'line',
+                    data: {
+                        labels: opponents, // Labels for quartiles
+                        datasets: [
+                            {
+                                label: 'Possession Time',
+                                data: total_possTime, // Pass success rates for each quartile
+                                borderColor: 'rgba(255, 99, 132, 0.7)', // Line color
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)', // Fill under the line
+                                borderWidth: 2, // Thickness of the line
+                                pointBackgroundColor: 'rgba(54, 162, 235, 1)', // Color for data points
+                                pointBorderColor: '#fff', // Border color for data points
+                                pointHoverBackgroundColor: '#fff', // Hover effect color
+                                pointHoverBorderColor: 'rgba(54, 162, 235, 1)', // Border color on hover
+                                tension: 0.4, // Curve smoothing for the line
+                                fill: true, // Fill the area under the line
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw}%`; // Adjust tooltip to show percentage
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: false
+                            },
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: false
+                                },
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Possession Percentage (%)',
+                                },
+                                beginAtZero: true, // Ensure y-axis starts at zero
+                                max: Math.max(...total_possTime) + 1, // Maximum value for pass success rate
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+        <div class="description-box">
+            <p>Total Time in Play (seconds)</p>
+            <div class="graph-box" id="singleDataDisplayBox">
+                <h1 id="totalinPlayDisplay"></h1>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const totalTimePlay = {{ TotalInPlayTime | tojson }};
+                const gamesDisplayElement = document.getElementById('totalinPlayDisplay');
+            
+                gamesDisplayElement.textContent = totalTimePlay;
+
+            // Optionally, add animations or styles dynamically
+            gamesDisplayElement.style.color = '#36A2EB'; // Blue color for text
+            gamesDisplayElement.style.fontSize = '4rem'; // Large font size
+            gamesDisplayElement.style.fontWeight = 'bold'; // Bold text
+            });
+        </script>
+        
+
     </div>
 </body>
 

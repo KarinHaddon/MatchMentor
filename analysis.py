@@ -193,7 +193,6 @@ def calculate_SuccessFailPasses(gameID, frame_range, pass_sequence):
 
     # Function to perform majority voting
     def majority_voting(frame_index, margin):
-        """Perform majority voting on possession within a margin around the given frame index."""
         start_index = max(0, frame_index - margin)
         end_index = min(len(frames) - 1, frame_index + margin)
         possession_window = possession[start_index:end_index + 1]
