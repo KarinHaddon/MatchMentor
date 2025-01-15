@@ -1,0 +1,175 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter Tight", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    z-index: 0;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../../images/stadium-4760441.jpg");
+    background-size: cover;
+    z-index: 1;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+}
+
+.banner {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: rgb(255, 255, 255);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.banner h2 {
+    font-size: 22px;
+    color: black;
+}
+
+.banner .match {
+    color: #000000;
+}
+
+.banner .mentor {
+    color: #33AFFF;
+}
+
+.button {
+    padding: 8px 15px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    color: #fff;
+    background-color: #000000;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    box-shadow: 0 4px #6e6e6e;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.button:hover {
+    background-color: #3684ea;
+}
+
+.button:active {
+    background-color: #3684ea;
+    box-shadow: 0 2px #666;
+    transform: translateY(2px);
+}
+
+.content-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    margin-top: 80px; 
+    z-index: 3;
+    height: calc(100vh - 120px);  /* Makes the layout adjust based on the available viewport height */
+}
+
+/* Left section contains the info and video */
+.left-section {
+    width: 53%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Game info container is smaller and above the video */
+.game-info-container {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.video-container {
+    background-color: #ffffff;
+    padding: 10px;
+    padding-left: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+h1, h3, p {
+    margin-bottom: 15px;
+}
+
+p {
+    font-size: 18px;
+}
+
+/* Right section with scrollable graph container */
+.graph-section {
+    width: 45%;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow-y: auto;  /* Enables vertical scrolling */
+    max-height: calc(100vh - 100px);  /* Adjust to the available space */
+}
+
+/* Graph boxes */
+.graph-box {
+    height: 150px;
+    background-color: #e0e0e0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    font-size: 18px;
+    background-color: rgba(54, 162, 235, 0.1); /* Light blue background */
+}
+
+.graph-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.graph-section h3 {
+    margin-bottom: 20px;
+}
+
+#goalsDisplay {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+#singleDataDisplayBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px; /* Adjust height as needed */
+    background-color: rgba(54, 162, 235, 0.1); /* Light blue background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}

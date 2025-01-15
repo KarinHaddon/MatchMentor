@@ -2,3 +2,8 @@ models/*
 data/*
 *.egg*
 __pycache__/*
+static/images/*
+static/uploads/*
+static/labels*
+static/run_training.txt
+submitit_logs/*

@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../../images/stadium-4760441.jpg");
+    background-size: cover;
+    z-index: 1;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+}
+
+body {
+    font-family: "Inter Tight", arial, serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 100%;
+    position: relative;
+    z-index: 0;
+}
+
+.container {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    z-index: 3;
+    text-align: center;
+    min-height: 400px;
+}
+
+.form .input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0px;
+    padding-top:12px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.input-group input {
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #000000;
+    border-radius: 3px;
+}
+
+.banner {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: rgb(255, 255, 255);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.banner h2 {
+    font-size: 22px;
+    color: black;
+    margin: 0;
+    padding-left: 5px;
+}
+
+.banner .match {
+    color: #000000;
+}
+
+.banner .mentor {
+    color: #33AFFF;
+}
+
+.box-title {
+    padding-bottom: 20px;
+}
+
+.button {
+    padding: 8px 15px;
+    font-size: 16px;
+    text-align: center;
+    justify-content: center;
+    cursor: pointer;
+    outline: none;
+    color: #fff;
+    background-color: #000000;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    box-shadow: 0 4px #6e6e6e;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.button:hover {
+    background-color: #3684ea;
+}
+
+.button:active {
+    background-color: #3684ea;
+    box-shadow: 0 2px #666;
+    transform: translateY(2px);
+}
+
+a.button, button.button{
+    text-align: center;
+    display: inline-block;
+}
+
+.message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}

@@ -1,0 +1,177 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter Tight", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-size: 100%;
+    z-index: 0;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../../images/stadium-4760441.jpg");
+    background-size: cover;
+    z-index: 1;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+}
+
+.banner {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: rgb(255, 255, 255);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.banner h2 {
+    font-size: 22px;
+    color: black;
+    margin: 0;
+    padding-left: 5px;
+}
+
+.banner .match {
+    color: #000000;
+}
+
+.banner .mentor {
+    color: #33AFFF;
+}
+
+.button {
+    padding: 8px 15px;
+    font-size: 16px;
+    text-align: center;
+    justify-content: center;
+    cursor: pointer;
+    outline: none;
+    color: #fff;
+    background-color: #000000;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    box-shadow: 0 4px #6e6e6e;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.button:hover {
+    background-color: #3684ea;
+}
+
+.button:active {
+    background-color: #3684ea;
+    box-shadow: 0 2px #666;
+    transform: translateY(2px);
+}
+
+.title-heading {
+    text-align: left;
+    padding-left: 30px;
+    margin-top: 100px;
+    margin-bottom: 20px;
+    z-index: 4;
+    position: relative;
+}
+
+.container {
+    background-color: #f0f0f0;
+    padding: 20px;
+    margin: 0 20px 20px 20px;
+    flex: 1;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two boxes per row */
+    gap: 20px;
+    z-index: 4;
+    position: relative;
+    overflow-y: auto; /* Enable scrolling */
+    max-height: 600px; /* Adjust the height based on your needs */
+}
+
+.description-box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: left;
+    height: 350px; /* Box height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.graph-container {
+    flex: 1; /* Ensures the graph container grows to fill available space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Required for canvas scaling */
+    height: 80%; /* Takes most of the box's height */
+}
+
+canvas {
+    max-width: 100%; /* Ensures the canvas doesn't exceed its container */
+    max-height: 100%; /* Ensures the canvas doesn't exceed its container */
+}
+
+#gamesCountDisplay {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin-bottom: 10px; /* Provides space between the count and the graph */
+}
+
+
+
+.graph-box {
+    height: 250px;
+    background-color: #e0e0e0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    font-size: 18px;
+    background-color: rgba(54, 162, 235, 0.1); /* Light blue background */
+}
+
+canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#singleDataDisplayBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 250px; /* Adjust height as needed */
+    background-color: rgba(54, 162, 235, 0.1); /* Light blue background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
